@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only published daily value documents are publicly readable. Do not use for private content.
+    match /daily_values/{day} {
+      allow get: if day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+      allow list, create, update, delete: if false;
+    }
+  }
+}

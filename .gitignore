@@ -1,0 +1,18 @@
+.gradle/
+.idea/
+local.properties
+build/
+**/build/
+*.iml
+
+.kotlin/
+
+# Keep local Firebase config, signing keys, credentials and build packages private.
+app/google-services.json
+*.apk
+*.aab
+*.jks
+*.keystore
+.env
+.env.*
+*service-account*.json

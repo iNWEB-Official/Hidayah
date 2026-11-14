@@ -8,6 +8,21 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 
 **International contributors:** The roadmap below covers release readiness, contributions, sharing, offline/cloud images, update policies and device testing. Contribution instructions and licensing are planned; please check issue and pull request guidance when published.
 
+### বর্তমানে উন্নয়নযোগ্য — ফ্রি-প্রথম পরিকল্পনা
+
+এই পরিকল্পনার তালিকা **এখনও নতুন ফিচার বাস্তবায়নের দাবি নয়**। পূর্ণ শর্ত ও কারণ: [অ্যাকাউন্ট ও ইউজার-লক্ষ্যভিত্তিক রোডম্যাপ](ACCOUNT-GROWTH-ROADMAP.md)।
+
+- [ ] বাংলা/ইংরেজি ভাষা ও error/সীমা-সংক্রান্ত বার্তা; email/password-এর বাস্তব provider সেটিংস, নিরাপত্তা ও ডিভাইস যাচাই। Spark-এ password reset-এর ১৫০টি **ইমেইল/দিন**, সফল reset হওয়া অ্যাকাউন্ট নয়। provider reset সময় যাচাই ছাড়া স্থানীয় রাত ১২টার নিশ্চয়তা নয়।
+- [ ] নিরাপদ free social login ও MFA-এর feasibility, পৃথক quota, consent এবং trusted limits যাচাই; রিসেট ও social quota-র শুধু client-side counter যথেষ্ট নয়।
+- [ ] প্রোফাইল privacy, trusted role ও rules, অ্যাকাউন্ট ডেটা/আইডি নকশা, quota monitoring এবং ১০০–২০০ KB লক্ষ্য, সর্বোচ্চ ২০০ KB profile photo compression পরিকল্পনা। ছবি cloud upload এখনও নেই। Firebase Storage-এ Blaze লাগে, তাই বর্তমানে billing ছাড়া সেটি চালু নয়।
+- [ ] আলাদা Gmail-এর Drive-এর ১৫ GB shared quota ও নিরাপদ সীমিত prototype, FCM এবং trusted sender যাচাই; Drive-এর quota Firestore/Firebase Storage-এর quota নয়।
+
+### 🔴 শীঘ্রই আসছে — ব্যবহারকারী-সংখ্যাভিত্তিক রোডম্যাপ
+
+- [ ] ০–১৪,৯৯৯ নিবন্ধিত অ্যাকাউন্ট: নিরাপদ ও ফ্রি সুবিধা ধাপে ধাপে; ১,০০০ / ৫,০০০ / ১০,০০০ কেবল প্রস্তাবিত usage-review মাইলফলক। বাস্তব quota যেকোনো সময় আগে শেষ হতে পারে।
+- [ ] ১৫,০০০+ অ্যাকাউন্টে মালিকের অনুমোদন ও বাজেট সাপেক্ষে নিজস্ব ভাড়া server, paid SMS OTP এবং অন্য paid ফিচার বিবেচনা; সংখ্যাটি পূর্ণ হলেই স্বয়ংক্রিয় billing নয়। বিস্তারিত ও সব profile চাহিদা [আলাদা রোডম্যাপে](ACCOUNT-GROWTH-ROADMAP.md)।
+- [ ] অকার্যকর future feature-এ accessible লাল `🔴 শীঘ্রই আসছে` / `🔴 Coming soon` দেখানো; এটি পরিকল্পিত, অ্যাপে এখনও যুক্ত হয়নি।
+
 ### সম্পন্ন কাজ ও বর্তমান অবস্থা
 
 - [x] Kotlin/Jetpack Compose ও MVVM ভিত্তিতে Home, Quran, Prayer Times ও Tracker—চারটি মূল ট্যাব যুক্ত।

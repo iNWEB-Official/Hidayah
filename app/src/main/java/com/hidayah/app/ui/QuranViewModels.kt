@@ -32,20 +32,30 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
     private val mutableState = MutableStateFlow(ReaderUiState())
     val state: StateFlow<ReaderUiState> = mutableState.asStateFlow()
     private var requestedSurah: Int? = null
+    // Requests can finish out of order. A generation also distinguishes retrying the same surah.
+    private var generation = 0L
 
     fun load(number: Int, retry: Boolean = false) {
         if (number !in 1..114 || (requestedSurah == number && !retry)) return
         requestedSurah = number
+        val request = ++generation
+        mutableState.value = ReaderUiState(loading = true)
         viewModelScope.launch {
-            mutableState.value = ReaderUiState(loading = true)
-            try { val chapter = repository.getChapter(number); mutableState.update { it.copy(loading = false, chapter = chapter) } }
-            catch (e: CancellationException) { throw e }
-            catch (_: Exception) { mutableState.update { it.copy(loading = false, error = "Could not load this surah. Check your connection and retry.") } }
+            try {
+                val chapter = repository.getChapter(number)
+                if (request == generation) mutableState.update { it.copy(loading = false, chapter = chapter) }
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) {
+                if (request == generation) mutableState.update { it.copy(loading = false, error = "Could not load this surah. Check your connection and retry.") }
+            }
         }
     }
 
     fun toggleTafsir(verse: Int) {
         val number = requestedSurah ?: return
+        val chapter = mutableState.value.chapter ?: return
+        if (chapter.surah.number != number || chapter.verses.none { it.number == verse }) return
+        val request = generation
         val previous = mutableState.value.tafsirs[verse] ?: TafsirState()
         if (previous.expanded) {
             setTafsir(verse, previous.copy(expanded = false)); return
@@ -57,10 +67,12 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
         viewModelScope.launch {
             try {
                 val result = repository.getTafsir(number, verse)
+                if (request != generation) return@launch
                 val latest = mutableState.value.tafsirs[verse] ?: return@launch
                 setTafsir(verse, latest.copy(loading = false, data = result, error = null))
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
+                if (request != generation) return@launch
                 val latest = mutableState.value.tafsirs[verse] ?: return@launch
                 setTafsir(verse, latest.copy(loading = false, error = "Tafsir unavailable. Tap to retry."))
             }

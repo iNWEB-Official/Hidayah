@@ -4,16 +4,25 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 
 ## রোডম্যাপ | Project roadmap
 
-এই চেকলিস্ট সম্পূর্ণ অ্যাপ উন্নয়নের পরিকল্পনা; অসমাপ্ত ফিচারকে সম্পন্ন বলে বোঝায় না। ধাপগুলো একে একে বাস্তবায়ন, GitHub Actions-এ যাচাই এবং সংক্ষিপ্ত অগ্রগতি রিপোর্ট দেওয়া হবে। ধর্মীয় বিষয়বস্তু ও বাস্তব ডিভাইস পরীক্ষা প্রকাশের আগে গুরুত্বপূর্ণ।
+এই চেকলিস্ট সম্পূর্ণ অ্যাপ উন্নয়নের পরিকল্পনা। **[x]** মানে বর্ণিত কাজ বাস্তবায়িত বা সম্পন্ন; **[ ]** মানে কাজ বা যাচাই বাকি। বাস্তবায়নে টিক থাকলেই ডিভাইসে পরীক্ষা বা ধর্মীয় পর্যালোচনা সম্পন্ন বোঝায় না। প্রতিটি ধাপ শেষ ও যাচাই হলে সংশ্লিষ্ট টিক ও অগ্রগতি রিপোর্ট হালনাগাদ করা হবে।
 
 **International contributors:** The roadmap below covers release readiness, contributions, sharing, offline/cloud images, update policies and device testing. Contribution instructions and licensing are planned; please check issue and pull request guidance when published.
 
-### বর্তমান অবস্থা
+### সম্পন্ন কাজ ও বর্তমান অবস্থা
 
-- [x] Kotlin/Jetpack Compose অ্যাপের Home, Quran, Prayer Times ও Tracker চারটি মূল ট্যাব; Firestore দৈনিক কনটেন্ট ও স্থানীয় Room tracker যুক্ত।
-- [x] দৈনিক হাদিস/আয়াত টেক্সট ও ছবিতে শেয়ার এবং প্রকাশিত উদ্ধৃতি ও সূত্রসহ PNG প্রিভিউ; ঐচ্ছিক অ্যাডমিন URL/ডিফল্ট ID ও keyword-ভিত্তিক fallback যুক্ত। উদ্ধৃতি AI দিয়ে তৈরি হয় না।
-- [x] ২০টি bundled ব্যাকগ্রাউন্ড: ১৯টি পৃথক মূল দৃশ্য ও একটি ভ্যারিয়েন্ট। GitHub Actions-এ JVM টেস্ট ও debug APK বিল্ড সফল।
-- [ ] বাস্তব Android ডিভাইস পরীক্ষা, পূর্ণ ধর্মীয় ও নিরাপত্তা পর্যালোচনা, production release এবং নিচের নতুন ফিচারগুলো এখনো বাকি। বর্তমানে প্রকাশিত GitHub Release নেই।
+- [x] Kotlin/Jetpack Compose ও MVVM ভিত্তিতে Home, Quran, Prayer Times ও Tracker—চারটি মূল ট্যাব যুক্ত।
+- [x] Firestore থেকে দৈনিক কনটেন্ট পড়ার ব্যবস্থা ও Room-এ ডিভাইস-স্থানীয় tracker যুক্ত। Firebase rules ও সব কনটেন্টের পর্যালোচনা আলাদা কাজ।
+- [x] কুরআনের সুরা, আরবি, বাংলা অনুবাদ/তাফসির ও Media3 অডিওর অনলাইন ব্যবস্থা যুক্ত।
+- [x] Adhan দিয়ে নামাজের সময়, কিবলা সেন্সর ও Prayer Times-এ রমজানের সেহরি/ইফতার সূচির প্রাথমিক ব্যবস্থা যুক্ত।
+- [x] সাইড মেনু, সেটিংস, ডার্ক মোড, সার্চ ও ঐচ্ছিক দৈনিক স্মরণবার্তার প্রাথমিক ব্যবস্থা যুক্ত।
+- [x] বিষয়ভিত্তিক মূল্যবোধ, ছোট দোয়া সংগ্রহ, শিক্ষণীয় গল্প ও কুইজের প্রাথমিক সংস্করণ যুক্ত।
+- [x] দৈনিক হাদিস/আয়াতের টেক্সট শেয়ার, প্রকাশিত উদ্ধৃতি ও সূত্রসহ ছবি প্রিভিউ এবং Android share sheet যুক্ত। AI দিয়ে উদ্ধৃতি তৈরি করা হয় না।
+- [x] ঐচ্ছিক অ্যাডমিন image URL ও bundled background ID; keyword-ভিত্তিক ডিফল্ট নির্বাচন ও অনুপলব্ধ URL-এর fallback যুক্ত।
+- [x] Firestore কনটেন্ট ও ছবির নির্দেশনার জন্য [অ্যাডমিন গাইড](ADMIN-DAILY-HADITH-GUIDE.md) তৈরি। নতুন ফিচারের জন্য এটি পরেও হালনাগাদ করতে হবে।
+- [x] ২০টি bundled ব্যাকগ্রাউন্ড যুক্ত: ১৯টি পৃথক মূল দৃশ্য ও একটি ভ্যারিয়েন্ট। ১,০০০ পৃথক ছবির লক্ষ্য এখনো সম্পূর্ণ নয়।
+- [x] GitHub Actions-এ JVM টেস্ট ও debug APK বিল্ডের ব্যবস্থা যুক্ত; সর্বশেষ রান সফল। লোকাল build/test করা হচ্ছে না।
+- [x] বর্তমান `versionName` `2026.0.1` ও `versionCode` `20260001` সেট করা আছে। ভবিষ্যৎ update ও release নীতি বাস্তবায়ন নিচে বাকি।
+- [ ] বাস্তব Android ডিভাইসে যাচাই, ধর্মীয় ও নিরাপত্তা পর্যালোচনা এবং production release বাকি। এখনো কোনো GitHub Release প্রকাশিত হয়নি।
 
 ### ধাপ ১ — বিদ্যমান অ্যাপ যাচাই ও প্রকাশের প্রস্তুতি
 
@@ -32,15 +41,18 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 
 - [ ] সাইড মেনুর নিচে অ্যাপের নাম, কপিরাইট এবং ক্লিকযোগ্য `iNWEB-Official/Hidayah` রিপোজিটরি/কন্ট্রিবিউশন লিংক।
 - [ ] ছবির নিচে মাঝখানে অ্যাপের পরিচিতি, কপিরাইট ও GitHub Release ডাউনলোড ঠিকানা; প্রকাশিত সম্পূর্ণ উদ্ধৃতি ও সঠিক সূত্র পরিষ্কার রাখা।
-- [ ] টেক্সট শেয়ার ও ছবি প্রিভিউ, ব্যবহারকারীর অনুরোধে ডিভাইসে সেভ এবং সোশ্যাল শেয়ার সহজ করা। শেয়ার টেক্সটেও ডাউনলোড লিংক থাকবে: ছবিতে লেখা লিংক সাধারণত ক্লিকযোগ্য নয় এবং সব অ্যাপ শেয়ার টেক্সট গ্রহণ করে না। Android share sheet/অনুমতিতে অতিরিক্ত ধাপ লাগতে পারে।
-- [ ] Firestore থেকে অ্যাডমিনের যাচাই করা লেখা ও ছবির নির্দেশ বজায় রাখা; বিদ্যমান [অ্যাডমিন গাইড](ADMIN-DAILY-HADITH-GUIDE.md) নতুন ফিচারের সঙ্গে হালনাগাদ করা।
+- [x] টেক্সট শেয়ার, ছবি প্রিভিউ এবং Android share sheet দিয়ে ছবি শেয়ারের প্রাথমিক ব্যবস্থা যুক্ত।
+- [ ] ব্যবহারকারীর অনুরোধে ডিভাইসে ছবি সেভ এবং সোশ্যাল শেয়ার উন্নত করা। শেয়ার টেক্সটেও ডাউনলোড লিংক থাকবে: ছবিতে লেখা লিংক সাধারণত ক্লিকযোগ্য নয় এবং সব অ্যাপ শেয়ার টেক্সট গ্রহণ করে না। Android share sheet/অনুমতিতে অতিরিক্ত ধাপ লাগতে পারে।
+- [x] Firestore থেকে প্রকাশিত লেখা ও ঐচ্ছিক ছবির নির্দেশ ব্যবহারের ব্যবস্থা এবং প্রাথমিক অ্যাডমিন গাইড যুক্ত।
+- [ ] নতুন শেয়ারিং ও ক্লাউড ফিচারের সঙ্গে অ্যাডমিন গাইড হালনাগাদ এবং ধর্মীয় লেখা প্রকাশের আগে যোগ্য পর্যালোচনা।
 
 ### ধাপ ৪ — হালকা অফলাইন ও ১,০০০ ছবির সংগ্রহ
 
 - [ ] সর্বমোট **১,০০০টি পৃথক মূল ছবি** ধাপে ধাপে তৈরি; বর্তমানে ১৯টি আছে, আরও ৯৮১টি প্রয়োজন। একবারে সর্বোচ্চ ৫টি তৈরি ও যাচাই; বিদ্যমান ভ্যারিয়েন্টটি পৃথক ছবি দিয়ে প্রতিস্থাপন।
 - [ ] অ্যাপের ভেতরে সর্বোচ্চ **৪০–৫০টি** অল্প সাইজের ডিফল্ট ছবি; কম্প্রেশন, APK আকার, মান ও পাঠযোগ্যতা পরিমাপ। বাকি ছবি ক্লাউডে রাখা হবে।
 - [ ] ফ্রি ব্যবহারসীমা, bandwidth, নির্ভরযোগ্যতা, অধিকার ও সম্ভাব্য খরচ দেখে ক্লাউড হোস্ট নির্বাচন; paid AI image API বা অনিচ্ছাকৃত billing নয়।
-- [ ] বিষয় ও ID-ভিত্তিক ক্যাটালগ, অ্যাডমিন নির্বাচন, আগের উপযুক্ত ছবি ও keyword-based fallback। অর্থ বোঝার ক্ষেত্রে keyword matching-এর সীমাবদ্ধতা স্পষ্ট রাখা।
+- [x] bundled ছবি বিষয় ও ID অনুযায়ী নির্ধারণ, অ্যাডমিন ID নির্বাচন ও keyword-based fallback-এর প্রাথমিক ব্যবস্থা। এটি AI-ভিত্তিক অর্থ বোঝা নয়।
+- [ ] ক্লাউড ছবির সম্প্রসারিত ক্যাটালগ ও অ্যাডমিন নির্বাচন বাস্তবায়ন।
 - [ ] অনলাইনে প্রয়োজনীয় ছবি ডাউনলোড করে app-private storage-এ রাখা: পটভূমিগুলো সাধারণ গ্যালারিতে দেখা যাবে না এবং সংরক্ষিত ছবি অফলাইনে চলবে। ব্যবহারকারী চাইলে কেবল চূড়ান্ত শেয়ার ছবি দৃশ্যমান স্থানে সেভ করতে পারবেন।
 - [ ] নেটওয়ার্ক ব্যর্থতা, সীমিত ডেটা, URL ও ফাইল নিরাপত্তা, private storage-এর আকারসীমা/পরিষ্কারের নিয়ম এবং bundled fallback বাস্তবায়ন ও পরীক্ষা।
 
@@ -115,7 +127,7 @@ Builds use one worker, a 768 MB Gradle heap and in-process Kotlin compilation. E
 
 ### Build verification notes
 
-The version 2026.0.1 debug APK was assembled successfully after resource-constrained retries. The latest completed JVM test run before the version update passed 29 tests; the test run after the version update was interrupted. The resulting debug APK passed ZIP and Android v2 signature checks. There was no Android device/emulator, so device, accessibility, audio, notification and Room instrumentation tests were not run. Cold builds in constrained environments may be slow; use the Gradle settings in this project and retry a failed task without cleaning. Debug signing keys are not included in the project. A differently signed debug APK requires uninstalling the previous app first, which deletes its local tracker data.
+The latest GitHub Actions run completed JVM tests and built, verified and uploaded a version 2026.0.1 debug APK. An earlier local run passed 29 JVM tests; no further local builds or tests are being performed. No Android device/emulator tests have been performed, so device, accessibility, audio, notification and Room instrumentation testing remain outstanding. Debug signing keys are not included in the project. A differently signed APK requires uninstalling the previous app first, which deletes its local tracker data.
 
 ## Bengali interface and starter learning modules
 

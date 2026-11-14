@@ -19,12 +19,15 @@ import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import com.hidayah.app.R
 import com.hidayah.app.data.DailyValue
+import com.hidayah.app.data.PublicImageDns
 import com.hidayah.app.data.safeShareBackgroundUrl
 import com.hidayah.app.data.selectHadithBackground
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.net.URL
-import javax.net.ssl.HttpsURLConnection
+import java.net.Proxy
+import java.util.concurrent.TimeUnit
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -48,19 +51,29 @@ private const val MAX_IMAGE_AREA = 100_000_000L
 private const val OUTPUT_WIDTH = 1080
 private const val MAX_OUTPUT_HEIGHT = 6000
 
-/** HTTPS only, no redirects, bounded bytes, bounded decoded dimensions and short timeouts. */
+// Direct connections only: a proxy could bypass the checked destination DNS. Default TLS verifies hostname.
+private val imageClient = OkHttpClient.Builder()
+    .proxy(Proxy.NO_PROXY)
+    .dns(PublicImageDns)
+    .followRedirects(false)
+    .followSslRedirects(false)
+    .connectTimeout(8, TimeUnit.SECONDS)
+    .readTimeout(8, TimeUnit.SECONDS)
+    .callTimeout(20, TimeUnit.SECONDS)
+    .build()
+
+/** HTTPS, checked connection addresses, no redirects, bounded bytes and decoded dimensions. */
 private fun fetchBackground(raw: String?): Bitmap? {
     val safeUrl = safeShareBackgroundUrl(raw) ?: return null
-    val connection = (URL(safeUrl).openConnection() as HttpsURLConnection).apply {
-        connectTimeout = 8_000; readTimeout = 8_000; instanceFollowRedirects = false
-        setRequestProperty("Accept", "image/jpeg, image/png, image/webp")
-    }
-    try {
-        if (connection.responseCode != 200 || connection.contentLengthLong > MAX_DOWNLOAD) return null
-        val mime = connection.contentType?.substringBefore(';')?.lowercase() ?: return null
+    val request = Request.Builder().url(safeUrl).header("Accept", "image/jpeg, image/png, image/webp").build()
+    return imageClient.newCall(request).execute().use { response ->
+        if (response.code != 200) return null
+        val body = response.body ?: return null
+        if (body.contentLength() > MAX_DOWNLOAD) return null
+        val mime = response.header("Content-Type")?.substringBefore(';')?.trim()?.lowercase() ?: return null
         if (mime !in setOf("image/jpeg", "image/png", "image/webp")) return null
         val bytes = ByteArrayOutputStream().use { output ->
-            connection.inputStream.use { input ->
+            body.byteStream().use { input ->
                 val buffer = ByteArray(8192)
                 var total = 0
                 while (true) {
@@ -78,8 +91,8 @@ private fun fetchBackground(raw: String?): Bitmap? {
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0 || bounds.outWidth.toLong() * bounds.outHeight > MAX_IMAGE_AREA) return null
         var sample = 1
         while (bounds.outWidth / sample > 2000 || bounds.outHeight / sample > 3000) sample *= 2
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
-    } finally { connection.disconnect() }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+    }
 }
 
 private fun layoutText(text: String, typeface: Typeface, size: Float, color: Int, arabic: Boolean = false): StaticLayout {

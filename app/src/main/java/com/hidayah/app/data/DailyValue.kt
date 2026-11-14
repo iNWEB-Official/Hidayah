@@ -8,6 +8,8 @@ data class DailyValue(
     val referenceText: String,
     val reference: String,
     val referenceArabic: String? = null,
+    val shareBackgroundId: String? = null,
+    val shareBackgroundUrl: String? = null,
 )
 
 /** Reject incomplete entries rather than inventing religious text or a citation. */
@@ -22,6 +24,8 @@ fun parseDailyValue(fields: Map<String, Any?>): DailyValue? {
         referenceText = field("referenceText") ?: return null,
         reference = field("reference") ?: return null,
         referenceArabic = field("referenceArabic"),
+        shareBackgroundId = field("shareBackgroundId")?.lowercase(),
+        shareBackgroundUrl = field("shareBackgroundUrl"),
     )
 }
 

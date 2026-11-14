@@ -1,6 +1,5 @@
 package com.hidayah.app.ui.screens
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,7 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.hidayah.app.R
 import com.hidayah.app.data.DailyValueStatus
-import com.hidayah.app.data.formatDailyValueShare
 import com.hidayah.app.ui.HomeViewModel
 import com.hidayah.app.ui.TrackerViewModel
 import com.hidayah.app.ui.theme.*
@@ -76,7 +74,6 @@ fun HomeScreen(viewModel: HomeViewModel, onOpenQuran: () -> Unit, onOpenPrayer: 
                onValues: () -> Unit, onDuas: () -> Unit, onLearning: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val owner = LocalLifecycleOwner.current
-    val context = LocalContext.current
     LaunchedEffect(owner, viewModel) { owner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) { while (true) { viewModel.refreshDate(); delay(60_000L) } } }
     Column(Modifier.fillMaxSize().background(Canvas).verticalScroll(rememberScrollState())) {
         Box(Modifier.fillMaxWidth().heightIn(min = 216.dp)) {
@@ -122,11 +119,7 @@ fun HomeScreen(viewModel: HomeViewModel, onOpenQuran: () -> Unit, onOpenPrayer: 
                     }
                     Spacer(Modifier.height(10.dp)); Text(daily.value.referenceText, color = Ink, fontSize = 16.sp, lineHeight = 26.sp, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(6.dp)); Text("সূত্র: ${daily.value.reference}", color = Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
-                    TextButton(onClick = {
-                        val share = Intent(Intent.ACTION_SEND).setType("text/plain")
-                            .putExtra(Intent.EXTRA_TEXT, formatDailyValueShare(daily.value))
-                        context.startActivity(Intent.createChooser(share, "শেয়ার করুন"))
-                    }) { Text("শেয়ার করুন") }
+                    DailyShareActions(daily.value)
                 }
             }
             Spacer(Modifier.height(24.dp)); SectionLabel("আপনার দৈনন্দিন সঙ্গী")

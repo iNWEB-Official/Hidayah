@@ -94,3 +94,7 @@ The application version is `2026.0.1` (Android `versionName`). Its numeric `vers
 ## App launcher icon
 
 Hidayah has a green, cream and gold mosque-and-crescent launcher icon. The manifest references `@mipmap/ic_launcher` and `@mipmap/ic_launcher_round`; density-specific PNGs and adaptive icon layers are included, with a monochrome layer for themed icons on Android 13+ when supported and enabled by the launcher. `branding/hidayah-icon.png` is a high-resolution preview, and `branding/hidayah-adaptive-foreground.png` is the transparent adaptive foreground. Verify the icon on real launchers and masks before release; icon appearance and themed-icon support vary by device.
+
+## দৈনিক কনটেন্টের ছবি শেয়ার
+
+Daily values can be shared as plain text or as a locally rendered PNG with the original published quotation and citation. An optional admin-provided direct HTTPS `shareBackgroundUrl` takes precedence over an optional bundled `shareBackgroundId`. If a remote image cannot load, the app falls back to the selected/keyword-matched bundled background. The 20 bundled variants derive from nine original AI scenes; keyword matching is heuristic, not AI-generated interpretation. There is no runtime AI image generation or paid AI API call. See [অ্যাডমিন গাইড](ADMIN-DAILY-HADITH-GUIDE.md) for fields, IDs, image requirements, privacy and limitations. Actual device sharing and typography must be tested.

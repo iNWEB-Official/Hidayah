@@ -15,6 +15,7 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - [x] কুরআনের সুরা, আরবি, বাংলা অনুবাদ/তাফসির ও Media3 অডিওর অনলাইন ব্যবস্থা যুক্ত।
 - [x] Adhan দিয়ে নামাজের সময়, কিবলা সেন্সর ও Prayer Times-এ রমজানের সেহরি/ইফতার সূচির প্রাথমিক ব্যবস্থা যুক্ত।
 - [x] সাইড মেনু, সেটিংস, ডার্ক মোড, সার্চ ও ঐচ্ছিক দৈনিক স্মরণবার্তার প্রাথমিক ব্যবস্থা যুক্ত।
+- [x] সাইড মেনুতে Firebase email/password login ও profile-এর প্রাথমিক কোড যুক্ত; বাস্তব Firebase সেটআপ ও ডিভাইস পরীক্ষা বাকি।
 - [x] বিষয়ভিত্তিক মূল্যবোধ, ছোট দোয়া সংগ্রহ, শিক্ষণীয় গল্প ও কুইজের প্রাথমিক সংস্করণ যুক্ত।
 - [x] দৈনিক হাদিস/আয়াতের টেক্সট শেয়ার, প্রকাশিত উদ্ধৃতি ও সূত্রসহ ছবি প্রিভিউ এবং Android share sheet যুক্ত। AI দিয়ে উদ্ধৃতি তৈরি করা হয় না।
 - [x] ঐচ্ছিক অ্যাডমিন image URL ও bundled background ID; keyword-ভিত্তিক ডিফল্ট নির্বাচন ও অনুপলব্ধ URL-এর fallback যুক্ত।
@@ -54,6 +55,12 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - [ ] নিরাপদ release signing key, ধারাবাহিক versionCode, যাচাইকৃত APK, release notes ও ডাউনলোড ব্যবস্থা নির্ধারণ; মালিকের অনুমোদনে প্রথম [GitHub Release](https://github.com/iNWEB-Official/Hidayah/releases) প্রকাশ। Actions-এর debug artifact-কে প্রকাশিত Release বলা হবে না।
 - [ ] বিদ্যমান debug ইনস্টলেশনের signing key ও নতুন release key ভিন্ন হলে সরাসরি আপডেট সম্ভব নয়—স্থানীয় ডেটা হারানোর ঝুঁকিসহ migration পরিকল্পনা ও ব্যবহারকারীকে সতর্ক করা।
 
+### ধাপ ২A — অ্যাকাউন্ট ও প্রোফাইল
+
+- [x] ঐচ্ছিক email/password login, signup, verification email, reset, logout এবং token থেকে User/Admin পরিচয়ের প্রাথমিক UI। [সেটআপ গাইড](ACCOUNT-SETUP.md)।
+- [ ] Firebase Console-এ Email/Password সেটিংস প্রকল্প মালিকের মাধ্যমে নিশ্চিত এবং বাস্তব ডিভাইসে signup/login/reset/verification/role পরীক্ষা; privacy policy ও account deletion প্রস্তুতি।
+- [ ] trusted privileged ব্যবস্থায় admin claim নিয়ন্ত্রণ এবং backend/security rules-এ বাস্তব admin অনুমতি নিশ্চিত করা; বর্তমান UI প্রশাসনিক অধিকার দেয় না।
+
 ### ধাপ ৩ — পরিচিতি ও দৈনিক কনটেন্ট শেয়ার
 
 - [ ] সাইড মেনুর নিচে অ্যাপের নাম, কপিরাইট এবং ক্লিকযোগ্য `iNWEB-Official/Hidayah` রিপোজিটরি/কন্ট্রিবিউশন লিংক।
@@ -67,10 +74,10 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 
 - [ ] সর্বমোট **১,০০০টি পৃথক মূল ছবি** ধাপে ধাপে তৈরি; বর্তমানে ১৯টি আছে, আরও ৯৮১টি প্রয়োজন। একবারে সর্বোচ্চ ৫টি তৈরি ও যাচাই; বিদ্যমান ভ্যারিয়েন্টটি পৃথক ছবি দিয়ে প্রতিস্থাপন।
 - [ ] অ্যাপের ভেতরে সর্বোচ্চ **৪০–৫০টি** অল্প সাইজের ডিফল্ট ছবি; কম্প্রেশন, APK আকার, মান ও পাঠযোগ্যতা পরিমাপ। বাকি ছবি ক্লাউডে রাখা হবে।
-- [ ] ফ্রি ব্যবহারসীমা, bandwidth, নির্ভরযোগ্যতা, অধিকার ও সম্ভাব্য খরচ দেখে ক্লাউড হোস্ট নির্বাচন; paid AI image API বা অনিচ্ছাকৃত billing নয়।
+- [ ] Google Drive প্রাথমিক পরীক্ষার সম্ভাব্য ছবি উৎস: সীমা, access/OAuth নিরাপত্তা, bandwidth, নির্ভরযোগ্যতা ও খরচ যাচাই; সফল পরীক্ষা ছাড়া production নির্ভরতা নয়। paid AI image API বা অনিচ্ছাকৃত billing নয়।
 - [x] bundled ছবি বিষয় ও ID অনুযায়ী নির্ধারণ, অ্যাডমিন ID নির্বাচন ও keyword-based fallback-এর প্রাথমিক ব্যবস্থা। এটি AI-ভিত্তিক অর্থ বোঝা নয়।
 - [ ] ক্লাউড ছবির সম্প্রসারিত ক্যাটালগ এবং অ্যাডমিনের নতুন/আগের ছবি দেখে নির্বাচন ও প্রকাশের পদ্ধতি বাস্তবায়ন ও নথিভুক্ত করা। বর্তমানে Firebase Console-এ URL বা ID দিতে হয়; অ্যাপে আলাদা অ্যাডমিন প্যানেল নেই।
-- [ ] অনলাইনে প্রয়োজনীয় ছবি ডাউনলোড করে app-private storage-এ রাখা: পটভূমিগুলো সাধারণ গ্যালারিতে দেখা যাবে না এবং সংরক্ষিত ছবি অফলাইনে চলবে। ব্যবহারকারী চাইলে কেবল চূড়ান্ত শেয়ার ছবি দৃশ্যমান স্থানে সেভ করতে পারবেন।
+- [ ] অ্যাডমিনের নতুন ছবিগুলো ক্যাটালগে প্রকাশের পর ব্যবহারকারীর ডিভাইস অনলাইনে সিঙ্ক করে app-private storage-এ রাখা: পটভূমিগুলো সাধারণ গ্যালারিতে দেখা যাবে না এবং সংরক্ষিত ছবি অফলাইনে চলবে। ব্যবহারকারী চাইলে কেবল চূড়ান্ত শেয়ার ছবি দৃশ্যমান স্থানে সেভ করতে পারবেন।
 - [ ] নেটওয়ার্ক ব্যর্থতা, সীমিত ডেটা, URL ও ফাইল নিরাপত্তা, private storage-এর আকারসীমা/পরিষ্কারের নিয়ম এবং bundled fallback বাস্তবায়ন ও পরীক্ষা।
 
 ### ধাপ ৫ — ভার্সন নীতি ও আপডেট ব্যবস্থা
@@ -111,7 +118,7 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - The current or next Ramadan is derived from Android's Umm al-Qura Hijri calendar. It is **an estimate** and can differ from local moon sightings and official dates. The timetable is not a religious ruling. It uses the device timezone, which must match the location, and a one-shot location fix that should be refreshed after travel.
 - Location is requested only when tapped and is not saved or directly transmitted by the app. Android's network location provider may use system services. Requests for Quran, tafsir and audio go to the external services named above and reveal normal network metadata such as IP address.
 - Qibla is geographic bearing corrected with magnetic declination. Sensor accuracy, approximate location and interference affect results; hold the phone flat, calibrate and verify independently.
-- The tracker is local-only and date-based. There are no accounts, offline Quran/audio, background playback, completed accessibility audit, full localization, or production scholarly review. An optional approximate daily reminder exists; it is not a prayer-time notification.
+- The tracker is local-only and date-based. Optional Firebase email/password account UI is implemented but requires project configuration and device testing. There is no offline Quran/audio, background playback, completed accessibility audit, full localization, or production scholarly review. An optional approximate daily reminder exists; it is not a prayer-time notification.
 
 ## Architecture
 

@@ -89,6 +89,7 @@ class HidayahViewModelFactory(private val context: Context) : ViewModelProvider.
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when (modelClass) {
         HomeViewModel::class.java -> HomeViewModel(AppContainer.dailyValueRepository)
+        AccountViewModel::class.java -> AccountViewModel(AppContainer.accountRepository)
         QuranViewModel::class.java -> QuranViewModel(AppContainer.quranRepository)
         QuranReaderViewModel::class.java -> QuranReaderViewModel(AppContainer.quranRepository)
         ValuesViewModel::class.java -> ValuesViewModel(AppContainer.quranRepository)

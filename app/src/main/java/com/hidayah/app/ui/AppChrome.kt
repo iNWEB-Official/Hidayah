@@ -32,7 +32,7 @@ data class DrawerLink(val route: String, val label: String)
 val DrawerLinks = listOf(
     DrawerLink("home", "হোম"), DrawerLink("quran", "আল-কুরআন"), DrawerLink("prayer", "নামাজ ও রমজান"),
     DrawerLink("tracker", "আমল ট্র্যাকার"), DrawerLink("values", "বিষয়ভিত্তিক মূল্যবোধ"), DrawerLink("duas", "দোয়া ও জিকির"),
-    DrawerLink("learning", "শিক্ষণীয় গল্প ও কুইজ"), DrawerLink("settings", "সেটিংস"),
+    DrawerLink("learning", "শিক্ষণীয় গল্প ও কুইজ"), DrawerLink("account", "লগইন ও প্রোফাইল"), DrawerLink("settings", "সেটিংস"),
 )
 
 @Composable

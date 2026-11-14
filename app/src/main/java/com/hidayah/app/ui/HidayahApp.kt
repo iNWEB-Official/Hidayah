@@ -37,6 +37,7 @@ import com.hidayah.app.ui.screens.ValuesScreen
 import com.hidayah.app.ui.screens.ValueDetailScreen
 import com.hidayah.app.ui.screens.DuasScreen
 import com.hidayah.app.ui.screens.LearningScreen
+import com.hidayah.app.ui.screens.AccountScreen
 import com.hidayah.app.ui.screens.SettingsScreen
 import com.hidayah.app.ui.screens.AppSearchScreen
 import com.hidayah.app.ui.screens.NotificationsScreen
@@ -92,7 +93,7 @@ fun HidayahApp(settings: SettingsStore) {
         NavigationBar(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
             tabs.forEach { tab ->
                 NavigationBarItem(
-                    selected = entry?.destination?.route == tab.route || (tab.route == "quran" && entry?.destination?.route == "quran/{number}") || (tab.route == "home" && entry?.destination?.route in listOf("values", "values/{topic}", "duas?query={query}", "learning?query={query}", "settings", "notifications", "search")),
+                    selected = entry?.destination?.route == tab.route || (tab.route == "quran" && entry?.destination?.route == "quran/{number}") || (tab.route == "home" && entry?.destination?.route in listOf("values", "values/{topic}", "duas?query={query}", "learning?query={query}", "settings", "account", "notifications", "search")),
                     onClick = {
                         navigateTab(tab.route)
                     },
@@ -127,6 +128,10 @@ fun HidayahApp(settings: SettingsStore) {
                 LearningScreen(initialQuery = backStack.arguments?.getString("query").orEmpty(), onBack = { navController.popBackStack() })
             }
             composable("settings") { SettingsScreen(settings, onBack = { navController.popBackStack() }) }
+            composable("account") {
+                val vm: AccountViewModel = viewModel(factory = factory)
+                AccountScreen(vm, onBack = { navController.popBackStack() })
+            }
             composable("notifications") { NotificationsScreen(settings, onBack = { navController.popBackStack() }, onSettings = { navigate("settings") }) }
             composable("search") {
                 AppSearchScreen(onBack = { navController.popBackStack() }, onSelect = { result ->

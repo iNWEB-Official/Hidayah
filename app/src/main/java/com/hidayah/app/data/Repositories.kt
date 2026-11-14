@@ -21,6 +21,7 @@ object AppContainer {
     val quranRepository: QuranRepository = CloudQuranRepository()
     val prayerCalculator: PrayerCalculator = AdhanPrayerCalculator()
     val dailyValueRepository: DailyValueRepository = FirestoreDailyValueRepository()
+    val accountRepository: AccountRepository by lazy { FirebaseAccountRepository() }
     @Volatile private var tracker: TrackerRepository? = null
     fun trackerRepository(context: Context): TrackerRepository = tracker ?: synchronized(this) {
         tracker ?: RoomTrackerRepository(HidayahDatabase.getInstance(context).deedDao()).also { tracker = it }

@@ -22,9 +22,15 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - [x] ২০টি bundled ব্যাকগ্রাউন্ড যুক্ত: ১৯টি পৃথক মূল দৃশ্য ও একটি ভ্যারিয়েন্ট। ১,০০০ পৃথক ছবির লক্ষ্য এখনো সম্পূর্ণ নয়।
 - [x] GitHub Actions-এ JVM টেস্ট ও debug APK বিল্ডের ব্যবস্থা যুক্ত; সর্বশেষ রান সফল। লোকাল build/test করা হচ্ছে না।
 - [x] বর্তমান `versionName` `2026.0.1` ও `versionCode` `20260001` সেট করা আছে। ভবিষ্যৎ update ও release নীতি বাস্তবায়ন নিচে বাকি।
-- [ ] বাস্তব Android ডিভাইসে যাচাই, ধর্মীয় ও নিরাপত্তা পর্যালোচনা এবং production release বাকি। এখনো কোনো GitHub Release প্রকাশিত হয়নি।
+- [x] প্রকল্প মালিক জানিয়েছেন যে তিনি অ্যাপটি নিজের মোবাইলে ইনস্টল করে ব্যবহার করেছেন এবং সুন্দরভাবে চলছে; পরীক্ষিত APK বা নির্দিষ্ট ফিচারের বিস্তারিত জানা নেই।
+- [ ] সব ফিচারের বিস্তারিত ডিভাইস যাচাই, ধর্মীয় ও নিরাপত্তা পর্যালোচনা এবং production release বাকি। এখনো কোনো GitHub Release প্রকাশিত হয়নি।
 
 ### ধাপ ১ — বিদ্যমান অ্যাপ যাচাই ও প্রকাশের প্রস্তুতি
+
+- [x] চারটি মূল ট্যাবের navigation ও বিদ্যমান টেস্ট ফাইলের প্রাথমিক কোড পর্যালোচনা: Home-এর দৈনিক ডেটা, Quran-এর UI, Prayer-এর গণনা এবং Tracker-এর Room ব্যবস্থার জন্য সংশ্লিষ্ট কোড রয়েছে। এটি কার্যকারিতা বা পূর্ণ ডিভাইস পরীক্ষার বিকল্প নয়।
+- [ ] পূর্বপরীক্ষিত APK-এর সংস্করণ ও ডিভাইসের তথ্য নিশ্চিত করে প্রতিটি ট্যাব এবং প্রয়োজনীয় পরিস্থিতির ফল আলাদাভাবে নথিভুক্ত করা।
+- [ ] রমজানে সেহরির আগে সাধারণ দোয়া ও ইফতারের দোয়ার আরবি, বাংলা অর্থ ও সূত্র যোগ্য ব্যক্তির দ্বারা যাচাই; সেহরির সাধারণ দোয়াকে বিশেষ বাধ্যতামূলক রোজার দোয়া হিসেবে দাবি না করা।
+- [ ] দেওয়া রেফারেন্সের সঙ্গে বাংলা টাইপোগ্রাফি ও সবুজ–ক্রিম–সোনালি নকশা, ছোট স্ক্রিন এবং light/dark theme তুলনা করে প্রয়োজনীয় সংশোধন।
 
 - [ ] চারটি মূল ট্যাব বজায় রেখে Home, Firestore rules ও দৈনিক লেখা; কুরআনের ১১৪ সুরা, বাংলা অনুবাদ/তাফসির ও Media3 অডিও; নামাজ, কিবলা, রমজানের সেহরি/ইফতার এবং Room tracker পরীক্ষা ও প্রয়োজনীয় সংশোধন।
 - [ ] দোয়া, গল্প/কুইজ, বাংলা ও আরবি লেখা, অনুবাদ এবং উদ্ধৃতি/সূত্র যোগ্য ব্যক্তির মাধ্যমে ধর্মীয় ও সম্পাদকীয় পর্যালোচনা; উৎসের লাইসেন্স ও ছবির ব্যবহারাধিকার যাচাই।
@@ -40,7 +46,7 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 ### ধাপ ৩ — পরিচিতি ও দৈনিক কনটেন্ট শেয়ার
 
 - [ ] সাইড মেনুর নিচে অ্যাপের নাম, কপিরাইট এবং ক্লিকযোগ্য `iNWEB-Official/Hidayah` রিপোজিটরি/কন্ট্রিবিউশন লিংক।
-- [ ] ছবির নিচে মাঝখানে অ্যাপের পরিচিতি, কপিরাইট ও GitHub Release ডাউনলোড ঠিকানা; প্রকাশিত সম্পূর্ণ উদ্ধৃতি ও সঠিক সূত্র পরিষ্কার রাখা।
+- [ ] ছবির নিচে মাঝখানে অ্যাপের পরিচিতি, কপিরাইট ও GitHub Release ডাউনলোড ঠিকানা; প্রকাশিত সম্পূর্ণ উদ্ধৃতি ও সঠিক সূত্র পরিষ্কার রাখা। বিষয় অনুযায়ী ছবি এবং বাংলা/আরবি টাইপোগ্রাফির উপযোগিতা পরীক্ষা।
 - [x] টেক্সট শেয়ার, ছবি প্রিভিউ এবং Android share sheet দিয়ে ছবি শেয়ারের প্রাথমিক ব্যবস্থা যুক্ত।
 - [ ] ব্যবহারকারীর অনুরোধে ডিভাইসে ছবি সেভ এবং সোশ্যাল শেয়ার উন্নত করা। শেয়ার টেক্সটেও ডাউনলোড লিংক থাকবে: ছবিতে লেখা লিংক সাধারণত ক্লিকযোগ্য নয় এবং সব অ্যাপ শেয়ার টেক্সট গ্রহণ করে না। Android share sheet/অনুমতিতে অতিরিক্ত ধাপ লাগতে পারে।
 - [x] Firestore থেকে প্রকাশিত লেখা ও ঐচ্ছিক ছবির নির্দেশ ব্যবহারের ব্যবস্থা এবং প্রাথমিক অ্যাডমিন গাইড যুক্ত।
@@ -52,7 +58,7 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - [ ] অ্যাপের ভেতরে সর্বোচ্চ **৪০–৫০টি** অল্প সাইজের ডিফল্ট ছবি; কম্প্রেশন, APK আকার, মান ও পাঠযোগ্যতা পরিমাপ। বাকি ছবি ক্লাউডে রাখা হবে।
 - [ ] ফ্রি ব্যবহারসীমা, bandwidth, নির্ভরযোগ্যতা, অধিকার ও সম্ভাব্য খরচ দেখে ক্লাউড হোস্ট নির্বাচন; paid AI image API বা অনিচ্ছাকৃত billing নয়।
 - [x] bundled ছবি বিষয় ও ID অনুযায়ী নির্ধারণ, অ্যাডমিন ID নির্বাচন ও keyword-based fallback-এর প্রাথমিক ব্যবস্থা। এটি AI-ভিত্তিক অর্থ বোঝা নয়।
-- [ ] ক্লাউড ছবির সম্প্রসারিত ক্যাটালগ ও অ্যাডমিন নির্বাচন বাস্তবায়ন।
+- [ ] ক্লাউড ছবির সম্প্রসারিত ক্যাটালগ এবং অ্যাডমিনের নতুন/আগের ছবি দেখে নির্বাচন ও প্রকাশের পদ্ধতি বাস্তবায়ন ও নথিভুক্ত করা। বর্তমানে Firebase Console-এ URL বা ID দিতে হয়; অ্যাপে আলাদা অ্যাডমিন প্যানেল নেই।
 - [ ] অনলাইনে প্রয়োজনীয় ছবি ডাউনলোড করে app-private storage-এ রাখা: পটভূমিগুলো সাধারণ গ্যালারিতে দেখা যাবে না এবং সংরক্ষিত ছবি অফলাইনে চলবে। ব্যবহারকারী চাইলে কেবল চূড়ান্ত শেয়ার ছবি দৃশ্যমান স্থানে সেভ করতে পারবেন।
 - [ ] নেটওয়ার্ক ব্যর্থতা, সীমিত ডেটা, URL ও ফাইল নিরাপত্তা, private storage-এর আকারসীমা/পরিষ্কারের নিয়ম এবং bundled fallback বাস্তবায়ন ও পরীক্ষা।
 
@@ -127,7 +133,7 @@ Builds use one worker, a 768 MB Gradle heap and in-process Kotlin compilation. E
 
 ### Build verification notes
 
-The latest GitHub Actions run completed JVM tests and built, verified and uploaded a version 2026.0.1 debug APK. An earlier local run passed 29 JVM tests; no further local builds or tests are being performed. No Android device/emulator tests have been performed, so device, accessibility, audio, notification and Room instrumentation testing remain outstanding. Debug signing keys are not included in the project. A differently signed APK requires uninstalling the previous app first, which deletes its local tracker data.
+The latest GitHub Actions run completed JVM tests and built, verified and uploaded a version 2026.0.1 debug APK. An earlier local run passed 29 JVM tests; no further local builds or tests are being performed. The project owner reports installing and using the app successfully on a phone; the APK and feature-by-feature results were not specified. Detailed device, accessibility, audio, notification and Room instrumentation testing remain outstanding. Debug signing keys are not included in the project. A differently signed APK requires uninstalling the previous app first, which deletes its local tracker data.
 
 ## Bengali interface and starter learning modules
 

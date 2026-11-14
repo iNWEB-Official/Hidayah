@@ -168,6 +168,6 @@ suspend fun shareHadithImage(context: Context, bitmap: Bitmap) {
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.sharefiles", file)
     val send = Intent(Intent.ACTION_SEND).setType("image/png")
         .putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .setClipData(ClipData.newUri(context.contentResolver, "হিদায়া দৈনিক শেয়ার", uri))
+        .apply { clipData = ClipData.newUri(context.contentResolver, "হিদায়া দৈনিক শেয়ার", uri) }
     context.startActivity(Intent.createChooser(send, "ছবি শেয়ার করুন"))
 }

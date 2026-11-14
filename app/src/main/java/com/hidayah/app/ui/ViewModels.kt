@@ -69,12 +69,13 @@ class PrayerViewModel(private val calculator: PrayerCalculator, private val loca
         mutableState.update { it.copy(date = date, zone = zone, prayers = emptyList(), qiblaBearing = null, ramadan = null, ramadanLoading = true, ramadanError = null) }
         calculationJob = viewModelScope.launch {
             try {
-                val (prayers, bearing, timetable) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
-                    Triple(calculator.calculate(point, date, zone, old.settings), calculator.qiblaBearing(point),
-                        RamadanSchedule(calculator).forCurrentOrNextRamadan(date, point, zone, old.settings))
+                val result = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                    calculatePrayerData(calculator, point, date, zone, old.settings)
                 }
-                mutableState.update { it.copy(prayers = prayers ?: emptyList(), qiblaBearing = bearing, ramadan = timetable, ramadanLoading = false,
-                    error = if (prayers == null) "Times are unavailable for this location and date. Check a trusted local timetable." else null) }
+                mutableState.update { it.copy(prayers = result.prayers ?: emptyList(), qiblaBearing = result.qiblaBearing,
+                    ramadan = result.ramadan, ramadanLoading = false,
+                    error = if (result.prayers == null) "Times are unavailable for this location and date. Check a trusted local timetable." else null,
+                    ramadanError = if (result.ramadan == null) "Ramadan timetable unavailable." else null) }
             } catch (e: kotlinx.coroutines.CancellationException) { throw e }
             catch (_: Exception) {
                 mutableState.update { it.copy(prayers = emptyList(), qiblaBearing = null, ramadan = null, ramadanLoading = false,

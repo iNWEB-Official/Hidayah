@@ -47,6 +47,8 @@ fun AccountScreen(viewModel: AccountViewModel, onBack: () -> Unit) {
                 Text("লগইন ছাড়াও অ্যাপের বর্তমান মূল সুবিধাগুলো ব্যবহার করা যায়।", color = Muted)
             } else {
                 val profile = state.profile!!
+                ProfileAvatarPicker(profile.uid)
+                Spacer(Modifier.height(14.dp))
                 Text(profile.email, color = Forest, style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 Text(when (profile.role) {

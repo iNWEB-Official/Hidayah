@@ -58,6 +58,8 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 ### ধাপ ২A — অ্যাকাউন্ট ও প্রোফাইল
 
 - [x] ঐচ্ছিক email/password login, signup, verification email, reset, logout এবং token থেকে User/Admin পরিচয়ের প্রাথমিক UI। [সেটআপ গাইড](ACCOUNT-SETUP.md)।
+- [x] Profile-এ শিশু, প্রাপ্তবয়স্ক ও প্রবীণ ছেলে/মেয়ের ছয়টি এবং একটি সাধারণ, ছোট built-in avatar নির্বাচন। পছন্দ শুধু ডিভাইসে account-ভিত্তিক সংরক্ষিত; Firebase sync নয়।
+- [ ] বিভিন্ন স্ক্রিন, বড় ফন্ট ও screen reader-এ avatar নির্বাচন ও ডিভাইসে স্থায়িত্ব পরীক্ষা।
 - [ ] Firebase Console-এ Email/Password সেটিংস প্রকল্প মালিকের মাধ্যমে নিশ্চিত এবং বাস্তব ডিভাইসে signup/login/reset/verification/role পরীক্ষা; privacy policy ও account deletion প্রস্তুতি।
 - [ ] trusted privileged ব্যবস্থায় admin claim নিয়ন্ত্রণ এবং backend/security rules-এ বাস্তব admin অনুমতি নিশ্চিত করা; বর্তমান UI প্রশাসনিক অধিকার দেয় না।
 

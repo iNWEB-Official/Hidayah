@@ -31,7 +31,7 @@ fun selectHadithBackground(value: DailyValue): BackgroundSelection {
     return BackgroundSelection(group.ids[index], false)
 }
 
-/** Only HTTPS DNS hostnames without credentials; no file, local network literal or cleartext URL. */
+/** Syntax filtering only; a DNS hostname can still resolve to a private address. Use trusted hosts. */
 fun safeShareBackgroundUrl(raw: String?): String? {
     val value = raw?.trim()?.takeIf { it.length in 1..2048 } ?: return null
     return try {

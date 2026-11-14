@@ -4,43 +4,62 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 
 ## রোডম্যাপ | Project roadmap
 
-এই তালিকা পরিকল্পনা, সম্পন্ন ফিচারের দাবি নয়। একবারে একটি ধাপ বাস্তবায়ন ও যাচাই করা হবে; অগ্রাধিকার প্রয়োজন অনুযায়ী পরিবর্তন হতে পারে। / These are planned milestones, not claims of completed features. Contributions and documentation should also be accessible to international contributors.
+এই চেকলিস্ট সম্পূর্ণ অ্যাপ উন্নয়নের পরিকল্পনা; অসমাপ্ত ফিচারকে সম্পন্ন বলে বোঝায় না। ধাপগুলো একে একে বাস্তবায়ন, GitHub Actions-এ যাচাই এবং সংক্ষিপ্ত অগ্রগতি রিপোর্ট দেওয়া হবে। ধর্মীয় বিষয়বস্তু ও বাস্তব ডিভাইস পরীক্ষা প্রকাশের আগে গুরুত্বপূর্ণ।
+
+**International contributors:** The roadmap below covers release readiness, contributions, sharing, offline/cloud images, update policies and device testing. Contribution instructions and licensing are planned; please check issue and pull request guidance when published.
 
 ### বর্তমান অবস্থা
 
-- Home-এর প্রকাশিত দৈনিক হাদিস/আয়াত টেক্সট ও ছবি হিসেবে শেয়ার করা যায়; ছবিতে প্রকাশিত উদ্ধৃতি ও সূত্র বসে। ক্লাউড ইমেজের URL থাকলে তা লোড হয়, ব্যর্থ হলে ডিফল্ট ছবি ব্যবহৃত হয়।
-- অ্যাপে ২০টি ডিফল্ট ব্যাকগ্রাউন্ড আছে: ১৯টি পৃথক মূল দৃশ্য ও ১টি ভ্যারিয়েন্ট। বর্তমানে স্থায়ী ব্যক্তিগত ক্লাউড-ইমেজ লাইব্রেরি, ছবিতে ব্র্যান্ডেড ফুটার এবং গ্যালারিতে সেভ করার সুবিধা **বাস্তবায়িত নয়**।
-- GitHub Actions-এ debug APK ও JVM টেস্ট সফল হয়েছে; বাস্তব Android ডিভাইসে পূর্ণ পরীক্ষা বাকি। রিপোজিটরিতে এখনো প্রকাশিত GitHub Release নেই।
+- [x] Kotlin/Jetpack Compose অ্যাপের Home, Quran, Prayer Times ও Tracker চারটি মূল ট্যাব; Firestore দৈনিক কনটেন্ট ও স্থানীয় Room tracker যুক্ত।
+- [x] দৈনিক হাদিস/আয়াত টেক্সট ও ছবিতে শেয়ার এবং প্রকাশিত উদ্ধৃতি ও সূত্রসহ PNG প্রিভিউ; ঐচ্ছিক অ্যাডমিন URL/ডিফল্ট ID ও keyword-ভিত্তিক fallback যুক্ত। উদ্ধৃতি AI দিয়ে তৈরি হয় না।
+- [x] ২০টি bundled ব্যাকগ্রাউন্ড: ১৯টি পৃথক মূল দৃশ্য ও একটি ভ্যারিয়েন্ট। GitHub Actions-এ JVM টেস্ট ও debug APK বিল্ড সফল।
+- [ ] বাস্তব Android ডিভাইস পরীক্ষা, পূর্ণ ধর্মীয় ও নিরাপত্তা পর্যালোচনা, production release এবং নিচের নতুন ফিচারগুলো এখনো বাকি। বর্তমানে প্রকাশিত GitHub Release নেই।
 
-### ধাপ ১ — প্রকাশ ও সহযোগিতার ভিত্তি
+### ধাপ ১ — বিদ্যমান অ্যাপ যাচাই ও প্রকাশের প্রস্তুতি
 
-- [ ] বর্তমান অ্যাপ, ধর্মীয় বিষয়বস্তু, Firebase নিরাপত্তা, তৃতীয় পক্ষের লাইসেন্স ও ছবির ব্যবহারাধিকার পর্যালোচনা; বাস্তব ডিভাইসে জরুরি ফিচার যাচাই।
-- [ ] প্রোজেক্ট মালিকের সঙ্গে সফটওয়্যার লাইসেন্স, অবদানের শর্ত, কোড পর্যালোচনা এবং release signing/versioning নির্ধারণ; কোনো লাইসেন্স অনুমান করে প্রকাশ নয়।
-- [ ] যাচাইকৃত APK-সহ প্রথম GitHub Release প্রকাশ এবং লিংক পরীক্ষা। Play Store-এ প্রকাশের আগে ডাউনলোডের জন্য [GitHub Releases](https://github.com/iNWEB-Official/Hidayah/releases) ব্যবহার; Actions artifact-কে Release বলা হবে না।
-- [ ] আন্তর্জাতিক অবদানকারীদের জন্য বাংলা ও ইংরেজিতে অবদানের আহ্বান, issue/PR নির্দেশনা ও নিরাপদ সহযোগিতার নিয়ম যোগ করা।
+- [ ] চারটি মূল ট্যাব বজায় রেখে Home, Firestore rules ও দৈনিক লেখা; কুরআনের ১১৪ সুরা, বাংলা অনুবাদ/তাফসির ও Media3 অডিও; নামাজ, কিবলা, রমজানের সেহরি/ইফতার এবং Room tracker পরীক্ষা ও প্রয়োজনীয় সংশোধন।
+- [ ] দোয়া, গল্প/কুইজ, বাংলা ও আরবি লেখা, অনুবাদ এবং উদ্ধৃতি/সূত্র যোগ্য ব্যক্তির মাধ্যমে ধর্মীয় ও সম্পাদকীয় পর্যালোচনা; উৎসের লাইসেন্স ও ছবির ব্যবহারাধিকার যাচাই।
+- [ ] প্রকৃত ডিভাইসে নেভিগেশন, অবস্থান, সেন্সর, রিমাইন্ডার, থিম, বড় ফন্ট, accessibility, শেয়ার ও ডেটা ধরে রাখা যাচাই। Firebase rules ও API restrictions পর্যালোচনা; privacy policy সম্পূর্ণ করা।
 
-### ধাপ ২ — অ্যাপের পরিচিতি ও শেয়ারিং
+### ধাপ ২ — GitHub Release ও কন্ট্রিবিউশন
 
-- [ ] সাইড মেনুর নিচে অ্যাপ ও `iNWEB-Official/Hidayah`-এর নামসহ কপিরাইট এবং প্রোজেক্টে অবদানের জন্য ক্লিকযোগ্য রিপোজিটরি লিংক যোগ।
-- [ ] হাদিস/আয়াতের শেয়ার ছবির নিচের মাঝখানে অ্যাপের পরিচিতি, কপিরাইট ও GitHub Release ডাউনলোড ঠিকানা যুক্ত করা; উদ্ধৃতি বা সূত্র যেন ঢাকা না পড়ে।
-- [ ] সম্পূর্ণ টেক্সট শেয়ার, ছবি ডিভাইসে সেভ ও সোশ্যাল শেয়ার সহজ করা; শেয়ারের টেক্সটেও ডাউনলোড লিংক দেওয়া। ছবির ভেতরের লিংক সাধারণত ক্লিকযোগ্য নয়, আর বিভিন্ন অ্যাপ শেয়ার টেক্সট ভিন্নভাবে গ্রহণ করতে পারে। Android-এর শেয়ার শিট বা অনুমতি চাওয়ার অতিরিক্ত ধাপ লাগতে পারে।
+- [ ] মালিকের সঙ্গে সফটওয়্যার লাইসেন্স, ছবি/কনটেন্টের অধিকার, সহযোগিতার শর্ত, issue/PR পর্যালোচনার নিয়ম নির্ধারণ। Public repository মানেই স্বয়ংক্রিয় open-source লাইসেন্স নয়।
+- [ ] দেশ-বিদেশের স্বেচ্ছাসেবী ডেভেলপারদের আমন্ত্রণ এবং বাংলা/ইংরেজি contribution নির্দেশনা, নিরাপত্তা ও আচরণবিধি প্রকাশ। GitHub Actions secrets ও workflow কেবল বিশ্বস্ত রক্ষণাবেক্ষকদের নিয়ন্ত্রণে রাখা।
+- [ ] নিরাপদ release signing key, ধারাবাহিক versionCode, যাচাইকৃত APK, release notes ও ডাউনলোড ব্যবস্থা নির্ধারণ; মালিকের অনুমোদনে প্রথম [GitHub Release](https://github.com/iNWEB-Official/Hidayah/releases) প্রকাশ। Actions-এর debug artifact-কে প্রকাশিত Release বলা হবে না।
+- [ ] বিদ্যমান debug ইনস্টলেশনের signing key ও নতুন release key ভিন্ন হলে সরাসরি আপডেট সম্ভব নয়—স্থানীয় ডেটা হারানোর ঝুঁকিসহ migration পরিকল্পনা ও ব্যবহারকারীকে সতর্ক করা।
 
-### ধাপ ৩ — হালকা অফলাইন ব্যাকগ্রাউন্ড
+### ধাপ ৩ — পরিচিতি ও দৈনিক কনটেন্ট শেয়ার
 
-- [ ] ৪০–৫০টি ছবির মধ্যে অফলাইন ডিফল্ট সীমাবদ্ধ রেখে উপযুক্ত কম্প্রেশন ও ছবির আকার নির্ধারণ; APK-এর আকার ও পড়তে সুবিধা উভয় পরীক্ষা।
-- [ ] বিদ্যমান একটি ভ্যারিয়েন্টের বদলে পৃথক ছবি তৈরি; এরপর বিষয়ভিত্তিক নতুন ছবি ধাপে ধাপে যোগ ও অফলাইন নির্বাচন পরীক্ষা। কোনো উদ্ধৃতি AI দিয়ে তৈরি করা হবে না।
+- [ ] সাইড মেনুর নিচে অ্যাপের নাম, কপিরাইট এবং ক্লিকযোগ্য `iNWEB-Official/Hidayah` রিপোজিটরি/কন্ট্রিবিউশন লিংক।
+- [ ] ছবির নিচে মাঝখানে অ্যাপের পরিচিতি, কপিরাইট ও GitHub Release ডাউনলোড ঠিকানা; প্রকাশিত সম্পূর্ণ উদ্ধৃতি ও সঠিক সূত্র পরিষ্কার রাখা।
+- [ ] টেক্সট শেয়ার ও ছবি প্রিভিউ, ব্যবহারকারীর অনুরোধে ডিভাইসে সেভ এবং সোশ্যাল শেয়ার সহজ করা। শেয়ার টেক্সটেও ডাউনলোড লিংক থাকবে: ছবিতে লেখা লিংক সাধারণত ক্লিকযোগ্য নয় এবং সব অ্যাপ শেয়ার টেক্সট গ্রহণ করে না। Android share sheet/অনুমতিতে অতিরিক্ত ধাপ লাগতে পারে।
+- [ ] Firestore থেকে অ্যাডমিনের যাচাই করা লেখা ও ছবির নির্দেশ বজায় রাখা; বিদ্যমান [অ্যাডমিন গাইড](ADMIN-DAILY-HADITH-GUIDE.md) নতুন ফিচারের সঙ্গে হালনাগাদ করা।
 
-### ধাপ ৪ — ক্লাউড ছবি ও ব্যক্তিগত ডিভাইস স্টোরেজ
+### ধাপ ৪ — হালকা অফলাইন ও ১,০০০ ছবির সংগ্রহ
 
-- [ ] ফ্রি ব্যবহারের সীমা, ট্রাফিক, নির্ভরযোগ্যতা ও সম্ভাব্য বিল পর্যালোচনা করে ক্লাউড হোস্ট এবং ছবি-ক্যাটালগ নির্বাচন; paid API বা অনিচ্ছাকৃত বিলিং নয়।
-- [ ] প্রয়োজন অনুযায়ী অনলাইনে ছবি ডাউনলোড এবং অ্যাপের ব্যক্তিগত স্টোরেজে রাখা, যাতে ব্যাকগ্রাউন্ডগুলো সাধারণ গ্যালারিতে দেখা না যায়; সংরক্ষিত ছবি অফলাইনে ব্যবহার। ব্যবহারকারীর অনুরোধে সেভ করা চূড়ান্ত শেয়ার ছবি আলাদা করে দৃশ্যমান হতে পারবে।
-- [ ] ছবি-ক্যাটালগ, নিরাপদ URL, বিষয়ভিত্তিক নির্বাচন, স্টোরেজ সীমা/পরিষ্কার, নেটওয়ার্ক ব্যর্থতা ও bundled fallback বাস্তবায়ন; ব্যবহারকারীর ডেটা ব্যবহার ও গোপনীয়তা বিবেচনা।
+- [ ] সর্বমোট **১,০০০টি পৃথক মূল ছবি** ধাপে ধাপে তৈরি; বর্তমানে ১৯টি আছে, আরও ৯৮১টি প্রয়োজন। একবারে সর্বোচ্চ ৫টি তৈরি ও যাচাই; বিদ্যমান ভ্যারিয়েন্টটি পৃথক ছবি দিয়ে প্রতিস্থাপন।
+- [ ] অ্যাপের ভেতরে সর্বোচ্চ **৪০–৫০টি** অল্প সাইজের ডিফল্ট ছবি; কম্প্রেশন, APK আকার, মান ও পাঠযোগ্যতা পরিমাপ। বাকি ছবি ক্লাউডে রাখা হবে।
+- [ ] ফ্রি ব্যবহারসীমা, bandwidth, নির্ভরযোগ্যতা, অধিকার ও সম্ভাব্য খরচ দেখে ক্লাউড হোস্ট নির্বাচন; paid AI image API বা অনিচ্ছাকৃত billing নয়।
+- [ ] বিষয় ও ID-ভিত্তিক ক্যাটালগ, অ্যাডমিন নির্বাচন, আগের উপযুক্ত ছবি ও keyword-based fallback। অর্থ বোঝার ক্ষেত্রে keyword matching-এর সীমাবদ্ধতা স্পষ্ট রাখা।
+- [ ] অনলাইনে প্রয়োজনীয় ছবি ডাউনলোড করে app-private storage-এ রাখা: পটভূমিগুলো সাধারণ গ্যালারিতে দেখা যাবে না এবং সংরক্ষিত ছবি অফলাইনে চলবে। ব্যবহারকারী চাইলে কেবল চূড়ান্ত শেয়ার ছবি দৃশ্যমান স্থানে সেভ করতে পারবেন।
+- [ ] নেটওয়ার্ক ব্যর্থতা, সীমিত ডেটা, URL ও ফাইল নিরাপত্তা, private storage-এর আকারসীমা/পরিষ্কারের নিয়ম এবং bundled fallback বাস্তবায়ন ও পরীক্ষা।
 
-### ধাপ ৫ — ১,০০০ ছবি ও ধারাবাহিক যাচাই
+### ধাপ ৫ — ভার্সন নীতি ও আপডেট ব্যবস্থা
 
-- [ ] অফলাইন ও ক্লাউড মিলিয়ে মোট **১,০০০টি পৃথক মূল ছবি**; বর্তমান ১৯টির পর আরও ৯৮১টি প্রয়োজন। একবারে সর্বোচ্চ ৫টি তৈরি, যাচাই ও বিষয় অনুযায়ী নথিভুক্ত করা।
-- [ ] প্রতিটি পর্যায়ে GitHub Actions-এ টেস্ট/বিল্ড এবং বাস্তব ডিভাইসে অফলাইন আচরণ, ছবির পাঠযোগ্যতা, আরবি/বাংলা, সেভ, শেয়ার, গ্যালারি ও বিভিন্ন স্ক্রিন যাচাই। ধর্মীয় উদ্ধৃতি ও সূত্র যোগ্য পর্যালোচকের মাধ্যমে যাচাই করা।
-- [ ] বাস্তব পরীক্ষার ফল অনুযায়ী সংশোধন ও পরবর্তী সংস্করণের versionCode বাড়িয়ে আপডেট প্রকাশ।
+- [ ] `বছর.মেজর.ছোট` নীতি প্রয়োগ: ছোট পরিবর্তনে শেষের সংখ্যা বাড়বে; `2026.0.99`-এর পরের ছোট পরিবর্তন `2026.1.0`। বড় পরিবর্তনেও মেজর বাড়বে ও ছোট সংখ্যা ০ হবে। `versionCode = বছর × 10000 + মেজর × 100 + ছোট`; মেজর ও ছোট উভয় ০–৯৯ এবং প্রতিটি বিতরণযোগ্য নতুন বিল্ডে আগের চেয়ে বেশি code।
+- [ ] বছর বদলালে মেজর ও ছোট সংখ্যা বহাল থাকবে, নাকি reset হবে—প্রোজেক্ট মালিকের সিদ্ধান্ত নিয়ে নথিভুক্ত করা। release tag, versionName ও versionCode-এর সামঞ্জস্য যাচাই।
+- [ ] স্থিতিশীল GitHub Release থেকে নির্ভরযোগ্য versionCode, release ক্রম এবং সংক্ষিপ্ত release notes সংগ্রহ; draft/pre-release বাদ। ইনস্টল করা সংস্করণ ও প্রকাশিত সংস্করণ তুলনা করে পপআপ ও settings-এ ম্যানুয়াল চেক যোগ।
+- [ ] ইনস্টল করা সংস্করণের পরের **তিনটি স্থিতিশীল Release** পর্যন্ত পূর্ণ ব্যবহারসহ আপডেট পেছানোর সুযোগ। চতুর্থ নতুন Release প্রকাশিত হলে পুরোনো সংস্করণ **সীমিত মোডে** যাবে; হিসাব versionCode-এর সংখ্যাগত পার্থক্য নয়, বাস্তবে প্রকাশিত স্থিতিশীল Release-এর ক্রমের ভিত্তিতে হবে।
+- [ ] সীমিত মোডে নামাজের সময় ও কুরআন পড়ার মতো জরুরি সুবিধা বজায় রাখা; অন্য সুবিধার জন্য আপডেট প্রয়োজন। নির্দিষ্ট সীমিত ফিচারের তালিকা এবং অফলাইন grace period-এর মেয়াদ মালিকের সঙ্গে পরে নির্ধারণ। কুরআন বর্তমানে অনলাইন API-নির্ভর—অফলাইনে পাঠের নিশ্চয়তা দেওয়া যাবে না যদি না আলাদা ব্যবস্থা করা হয়।
+- [ ] অস্থায়ী নেটওয়ার্ক/API ব্যর্থতা, rate limit, cache, খালি/ভুল Release metadata, প্রথম ইনস্টল এবং অফলাইনে grace period পরীক্ষা; ভুল করে ব্যবহারকারীকে সীমিত মোডে পাঠানো এড়ানো। client-side সীমাবদ্ধতা পরিবর্তিত অ্যাপে সম্পূর্ণ অনতিক্রম্য নয়।
+- [ ] পপআপের আপডেট বাটন থেকে যাচাইকৃত GitHub APK ডাউনলোড ও Android installer চালু করা; HTTPS, বিশ্বস্ত উৎস, package identity, signing certificate, আকার ও ব্যর্থতা যাচাই। সাধারণ GitHub-বিতরণ Android অ্যাপে নীরব install নিশ্চিত করা যায় না: Android-এর অনুমতি/নিশ্চিতকরণ লাগতে পারে। Play Store-এ গেলে উপযুক্ত in-app update পদ্ধতি পর্যালোচনা।
+
+### ধাপ ৬ — চূড়ান্ত যাচাই ও ধারাবাহিক উন্নয়ন
+
+- [ ] প্রতিটি বাস্তবায়ন ধাপে GitHub Actions-এ JVM টেস্ট ও APK build; ডিভাইসে install/update, একই signing key-এ upgrade ও পুরোনো লোকাল ডেটা অক্ষত থাকার পরীক্ষা। লোকাল build/test নয়।
+- [ ] প্রকৃত ডিভাইসে গ্যালারি গোপনীয়তা, অফলাইন ছবি, বাংলা/আরবি, ছবি সেভ/শেয়ার, update prompt, চতুর্থ Release, সীমিত মোড ও grace period পরীক্ষা।
+- [ ] সংশোধন ও যোগ্য পর্যালোচনা সম্পন্ন করে পর্যায়ক্রমে release notes এবং নতুন versionCode-সহ বিতরণ; ব্যবহারকারীর মতামত ও কমিউনিটি অবদান পর্যালোচনা।
+
 
 ## Run
 
@@ -63,7 +82,7 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - The current or next Ramadan is derived from Android's Umm al-Qura Hijri calendar. It is **an estimate** and can differ from local moon sightings and official dates. The timetable is not a religious ruling. It uses the device timezone, which must match the location, and a one-shot location fix that should be refreshed after travel.
 - Location is requested only when tapped and is not saved or directly transmitted by the app. Android's network location provider may use system services. Requests for Quran, tafsir and audio go to the external services named above and reveal normal network metadata such as IP address.
 - Qibla is geographic bearing corrected with magnetic declination. Sensor accuracy, approximate location and interference affect results; hold the phone flat, calibrate and verify independently.
-- The tracker is local-only and date-based. There are no accounts, notifications, offline Quran/audio, background playback, accessibility audit, localization, or production scholarly review.
+- The tracker is local-only and date-based. There are no accounts, offline Quran/audio, background playback, completed accessibility audit, full localization, or production scholarly review. An optional approximate daily reminder exists; it is not a prayer-time notification.
 
 ## Architecture
 
@@ -129,7 +148,7 @@ A top bar supplies the side menu, dark/light toggle, reminders status and search
 
 ## Versioning
 
-The application version is `2026.0.1` (Android `versionName`). Its numeric `versionCode` is `20260001`, calculated as year × 10000 + minor × 100 + patch (minor and patch 0–99). Always increase `versionCode` for subsequent distributed builds, including any build reissued with the same display version. This is a versioning convention, not an automatic calendar update.
+The current application version is `2026.0.1` (`versionName`) and `versionCode` is `20260001`. The planned format is year.major.small: increase the small number for each small change, and roll `2026.0.99` to `2026.1.0` for the next; major changes also increment major and reset small to zero. The numeric `versionCode` formula is year × 10000 + major × 100 + small, with major and small each 0–99. Each newly distributed build must have a larger `versionCode`; a build reissued with the same display version still needs a larger code, so plan the next public version to avoid formula collisions. The year-transition reset/carry rule is not yet decided. This convention is not an automatic calendar update.
 
 ## App launcher icon
 

@@ -16,6 +16,7 @@ An Android Kotlin/Compose MVVM starter with Home, Quran, Prayer Times and Tracke
 - [ ] নিরাপদ free social login ও MFA-এর feasibility, পৃথক quota, consent এবং trusted limits যাচাই; রিসেট ও social quota-র শুধু client-side counter যথেষ্ট নয়।
 - [ ] প্রোফাইল privacy, trusted role ও rules, অ্যাকাউন্ট ডেটা/আইডি নকশা, quota monitoring এবং ১০০–২০০ KB লক্ষ্য, সর্বোচ্চ ২০০ KB profile photo compression পরিকল্পনা। ছবি cloud upload এখনও নেই। Firebase Storage-এ Blaze লাগে, তাই বর্তমানে billing ছাড়া সেটি চালু নয়।
 - [ ] আলাদা Gmail-এর Drive-এর ১৫ GB shared quota ও নিরাপদ সীমিত prototype, FCM এবং trusted sender যাচাই; Drive-এর quota Firestore/Firebase Storage-এর quota নয়।
+- [ ] শুধু super-admin-এর জন্য quota সর্বোচ্চ/ব্যবহৃত/বাকি ও নিরাপদ enable/disable dashboard পরিকল্পনা; trusted backend authorization, provider থেকে সঠিক তথ্য, reset ও bypass যাচাই ছাড়া একে hard spending cap বলা যাবে না। [বিস্তারিত](ACCOUNT-GROWTH-ROADMAP.md#সুপার-অ্যাডমিন-ফ্রি-quota-ও-ফিচার-নিয়ন্ত্রণ-পরিকল্পনা)।
 
 ### 🔴 শীঘ্রই আসছে — ব্যবহারকারী-সংখ্যাভিত্তিক রোডম্যাপ
 

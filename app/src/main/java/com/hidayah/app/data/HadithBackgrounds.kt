@@ -5,7 +5,7 @@ import java.util.Locale
 
 data class BackgroundGroup(val label: String, val ids: List<String>, val keywords: List<String>)
 
-/** 20 local variants derived from nine original AI scenes; only keywords, not AI interpretation. */
+/** 20 local backgrounds: 14 original AI scenes and 6 variants; keyword selection is not AI interpretation. */
 val HadithBackgroundGroups = listOf(
     BackgroundGroup("ধৈর্য", listOf("patience_a", "patience_b"), listOf("ধৈর্য", "সবর", "sabr", "patience")),
     BackgroundGroup("দয়া", listOf("compassion_a", "compassion_b"), listOf("দয়া", "করুণা", "রহমত", "মমতা", "mercy", "compassion")),

@@ -37,4 +37,41 @@ class DailyValueTest {
         assertNull(parseDailyValue(base + ("referenceType" to "Other")))
         assertNull(parseDailyValue(base + ("referenceText" to "  ")))
     }
+
+    @Test fun eachRequiredFieldMustBeANonBlankString() {
+        val fields = listOf("title", "reflection", "referenceType", "referenceText", "reference")
+        for (field in fields) {
+            assertNull("missing $field", parseDailyValue(base - field))
+            assertNull("blank $field", parseDailyValue(base + (field to "  ")))
+            assertNull("wrong type $field", parseDailyValue(base + (field to 123)))
+        }
+    }
+
+    @Test fun ayatSharePreservesPublishedContentAndCitation() {
+        val value = parseDailyValue(base + ("referenceType" to "Ayat"))!!
+        assertEquals("Ayat", value.referenceType)
+        assertEquals("মূল্যবোধ\n\nব্যাখ্যা\n\nবাংলা অর্থ\n\nসূত্র: সূত্র", formatDailyValueShare(value))
+    }
+
+    @Test fun duplicateArabicAndReferenceTextAreSharedOnlyOnce() {
+        val value = parseDailyValue(base + mapOf("referenceText" to "একই লেখা", "referenceArabic" to " একই লেখা "))!!
+        assertEquals(1, Regex("একই লেখা").findAll(formatDailyValueShare(value)).count())
+        assertTrue(formatDailyValueShare(value).contains("সূত্র: সূত্র"))
+    }
+
+    @Test fun malformedOptionalFieldsDoNotBreakPublishedDocuments() {
+        val value = parseDailyValue(base + mapOf("referenceArabic" to 123, "shareBackgroundId" to false, "shareBackgroundUrl" to " "))!!
+        assertNull(value.referenceArabic)
+        assertNull(value.shareBackgroundId)
+        assertNull(value.shareBackgroundUrl)
+    }
+
+    @Test fun optionalBackgroundFieldsAreTrimmedWithoutChangingContent() {
+        val value = parseDailyValue(base + mapOf("shareBackgroundId" to "  CHARITY_B ", "shareBackgroundUrl" to " https://example.com/bg.jpg "))!!
+        assertEquals("charity_b", value.shareBackgroundId)
+        assertEquals("https://example.com/bg.jpg", value.shareBackgroundUrl)
+        assertEquals("বাংলা অর্থ", value.referenceText)
+        assertEquals("সূত্র", value.reference)
+    }
+
 }

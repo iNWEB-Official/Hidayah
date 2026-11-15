@@ -25,6 +25,7 @@ The app is under development. Please check prayer times and religious informatio
 | সব প্রকাশ্য resources | [Hidayah resources](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah) | Public |
 | ছবি ও background | [Hadith images ও banner](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah/app/src/main/res/drawable-nodpi) | Public |
 | Logo ও branding | [Hidayah branding](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah/branding) | Public |
+| Popup design preview | [Popup design image](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/blob/main/Hidayah/designs/support-popup/hidayah-popup-professional.png) | Public |
 | Font ও license | [Fonts](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah/app/src/main/res/font) · [Noto license](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/blob/main/Hidayah/NOTO-FONT-LICENSE.txt) | Public |
 | ব্যক্তিগত backup | [Hidayah Drive folder](https://drive.google.com/drive/folders/1vGat2kLPYfPCuOpfxfCQB3p9piMeFg_Q) | Restricted |
 

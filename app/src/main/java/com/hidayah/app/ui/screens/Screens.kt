@@ -96,14 +96,21 @@ fun HomeScreen(viewModel: HomeViewModel, onOpenQuran: () -> Unit, onOpenPrayer: 
                     DailyValueStatus.Loading -> Text("আজকের মূল্যবোধ লোড হচ্ছে…", color = Color.White)
                     is DailyValueStatus.Missing -> {
                         Text(if (daily.fromCache) "সংরক্ষিত তথ্য পাওয়া যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।" else "আজকের মূল্যবোধ এখনো প্রকাশিত হয়নি।", color = Color.White, fontSize = 14.sp, lineHeight = 22.sp)
-                        if (daily.fromCache) TextButton(onClick = viewModel::retry) { Text("আবার চেষ্টা করুন", color = Gold) }
+                        TextButton(onClick = viewModel::retry) { Text("আবার চেষ্টা করুন", color = Gold) }
                     }
-                    DailyValueStatus.Invalid -> Text("আজকের বিষয়বস্তু সম্পূর্ণ পাওয়া যায়নি। পরে আবার দেখুন।", color = Color.White)
+                    DailyValueStatus.Invalid -> {
+                        Text("আজকের বিষয়বস্তু সম্পূর্ণ পাওয়া যায়নি। পরে আবার দেখুন।", color = Color.White)
+                        TextButton(onClick = viewModel::retry) { Text("আবার চেষ্টা করুন", color = Gold) }
+                    }
                     is DailyValueStatus.Error -> { Text("তথ্য আনা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।", color = Color.White, fontSize = 13.sp); TextButton(onClick = viewModel::retry) { Text("আবার চেষ্টা করুন", color = Gold) } }
                     is DailyValueStatus.Available -> {
                         Text(daily.value.title, fontSize = 24.sp, lineHeight = 33.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         Spacer(Modifier.height(6.dp)); Text(daily.value.reflection, color = Color(0xFFE3EDE3), fontSize = 14.sp, lineHeight = 22.sp)
                         if (daily.fromCache) Text("সংরক্ষিত কপি", color = Gold, fontSize = 11.sp)
+                        if (daily.isFallback) {
+                            Text("বিকল্প দৈনিক লেখা দেখানো হচ্ছে।", color = Gold, fontSize = 11.sp)
+                            TextButton(onClick = viewModel::retry) { Text("অনলাইনে আবার চেষ্টা করুন", color = Gold) }
+                        }
                     }
                 }
             }

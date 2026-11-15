@@ -43,9 +43,10 @@ class RandomQuranDailyValueRepositoryTest {
 
     private class FakeFallback : DailyValueRepository {
         var calls = 0
+        var status: DailyValueStatus = DailyValueStatus.Missing(false)
         override fun observe(day: LocalDate): Flow<DailyValueStatus> = flow {
             calls++
-            emit(DailyValueStatus.Missing(false))
+            emit(status)
         }
     }
 
@@ -84,6 +85,32 @@ class RandomQuranDailyValueRepositoryTest {
         val states = RandomQuranDailyValueRepository(quran, fallback, Random(7)).observe(day).toList()
         assertEquals(DailyValueStatus.Missing(false), states.last())
         assertEquals(1, fallback.calls)
+    }
+
+    @Test fun fallbackContentIsMarkedAndRetryCanRecoverQuranSource() = runTest {
+        val quran = FakeQuran().apply { fail = true }
+        val fallbackValue = DailyValue("বিকল্প", "ভাবনা", "Ayat", "অনুবাদ", "সূত্র")
+        val fallback = FakeFallback().apply { status = DailyValueStatus.Available(fallbackValue, true) }
+        val repo = RandomQuranDailyValueRepository(quran, fallback, Random(7))
+        val fromFallback = repo.observe(day).toList().last() as DailyValueStatus.Available
+        assertEquals(fallbackValue, fromFallback.value)
+        assertTrue(fromFallback.isFallback)
+        assertTrue(fromFallback.fromCache)
+        quran.fail = false
+        val recovered = repo.observe(day).toList().last() as DailyValueStatus.Available
+        assertFalse(recovered.isFallback)
+        assertEquals("বাংলা অনুবাদ", recovered.value.referenceText)
+        assertEquals(1, fallback.calls)
+        assertEquals(2, quran.chapterCalls)
+    }
+
+    @Test fun fallbackErrorAndInvalidArePassedThrough() = runTest {
+        val quran = FakeQuran().apply { fail = true }
+        val fallback = FakeFallback().apply { status = DailyValueStatus.Error("network") }
+        val repo = RandomQuranDailyValueRepository(quran, fallback, Random(7))
+        assertEquals(DailyValueStatus.Error("network"), repo.observe(day).toList().last())
+        fallback.status = DailyValueStatus.Invalid
+        assertEquals(DailyValueStatus.Invalid, repo.observe(day).toList().last())
     }
 
     @Test fun mismatchAndInvalidChapterDoNotDisplayUnverifiedVerse() = runTest {

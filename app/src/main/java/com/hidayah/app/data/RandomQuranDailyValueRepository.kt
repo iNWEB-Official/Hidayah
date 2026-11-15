@@ -6,6 +6,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -36,7 +37,9 @@ class RandomQuranDailyValueRepository(
         if (result != null) {
             emit(DailyValueStatus.Available(result.first, result.second))
         } else {
-            emitAll(fallback.observe(day))
+            emitAll(fallback.observe(day).map { status ->
+                if (status is DailyValueStatus.Available) status.copy(isFallback = true) else status
+            })
         }
     }
 

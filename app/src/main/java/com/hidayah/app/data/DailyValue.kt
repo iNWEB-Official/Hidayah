@@ -40,7 +40,7 @@ fun formatDailyValueShare(value: DailyValue): String = listOfNotNull(
 
 sealed interface DailyValueStatus {
     data object Loading : DailyValueStatus
-    data class Available(val value: DailyValue, val fromCache: Boolean) : DailyValueStatus
+    data class Available(val value: DailyValue, val fromCache: Boolean, val isFallback: Boolean = false) : DailyValueStatus
     data class Missing(val fromCache: Boolean) : DailyValueStatus
     data object Invalid : DailyValueStatus
     data class Error(val message: String) : DailyValueStatus

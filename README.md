@@ -23,9 +23,9 @@ Prayer times depend on location, the device time zone and the chosen calculation
 
 The Qibla compass and estimated Ramadan timetable need device and local-authority verification; unavailable times remain blank. The daily reminder initially targets 8 pm and then runs roughly every 24 hours; exact timing and delivery are not guaranteed.
 
-দৈনিক লেখার ছবি শেয়ারে শিরোনাম, ব্যাখ্যা, উপলব্ধ আরবি, বাংলা লেখা ও সূত্র রাখার ব্যবস্থা আছে; লেখা বেশি বড় হলে টেক্সট শেয়ারের পরামর্শ দেওয়া হয়। অ্যাকাউন্ট ও শেয়ার বাস্তব ফোনে এবং Firebase নিরাপত্তা আলাদাভাবে যাচাই প্রয়োজন।
+দৈনিক লেখার ছবি শেয়ারে শিরোনাম, ব্যাখ্যা, উপলব্ধ আরবি, বাংলা লেখা ও সূত্র রাখার ব্যবস্থা আছে; লেখা বেশি বড় হলে টেক্সট শেয়ারের পরামর্শ দেওয়া হয়। ছবির preview থেকে ব্যবহারকারী নিজে জায়গা বেছে সংরক্ষণের অনুরোধ করতে পারেন। অ্যাকাউন্ট, share ও save বাস্তব ফোনে এবং Firebase নিরাপত্তা আলাদাভাবে যাচাই প্রয়োজন।
 
-Daily share images are designed to include the title, reflection, available Arabic, translation and citation; for oversized content, users are prompted to share as text instead. Account and sharing flows need device testing, and Firebase security requires separate review.
+Daily share images are designed to include the title, reflection, available Arabic, translation and citation; for oversized content, users are prompted to share as text instead. From the preview, users can request a save to a location chosen in the system document picker. Account, sharing and saving need device testing, and Firebase security requires separate review.
 
 Home অনলাইনে Al Quran Cloud থেকে একটি দৈবচয়িত আয়াত দেখায়; উৎস অনুপলব্ধ হলে বিদ্যমান Firestore দৈনিক কনটেন্ট fallback হিসেবে ব্যবহৃত হয়। বিকল্প লেখা, অনুপস্থিত, অসম্পূর্ণ বা error অবস্থায় retry বাটনে আবার চেষ্টা করা যায়; ইন্টারনেট ফিরলেই Quran উৎস স্বয়ংক্রিয়ভাবে পুনরায় চেষ্টা করা হয় না। একই অ্যাপ প্রক্রিয়ায় দিনের বাকি সময়ে আয়াতটি পুনরায় ব্যবহার করা হয়; ব্যবহারকারী বা নতুন অ্যাপ প্রক্রিয়ায় ভিন্ন হতে পারে। বাংলা অনুবাদ মুহিউদ্দীন খানের; ধর্মীয় ও ডিভাইস যাচাই এখনও প্রয়োজন।
 
@@ -37,7 +37,7 @@ The Quran reader is online-only. It checks chapter and verse identities across A
 
 আরবি অডিওতে শুধু একটি আয়াত, নির্বাচিত আয়াত থেকে সূরার শেষ পর্যন্ত বা প্রথম থেকে পুরো সূরা শোনার নিয়ন্ত্রণ রয়েছে। এই পরিবর্তন বাস্তব ডিভাইসে যাচাই বাকি। বাংলা অনুবাদ ও তাফসির অডিও এখনও যুক্ত নয়; উপযুক্ত রেকর্ডিং ও ব্যবহারাধিকার যাচাই প্রয়োজন।
 
-Arabic recitation controls support a single ayah, playback from a selected ayah to the end, or the whole surah. Device playback verification remains pending. Bengali translation and tafsir audio are not implemented; suitable recordings and rights remain to be verified.
+Arabic recitation controls support a single ayah, playback from a selected ayah to the end, or the whole surah. Buffering and playback errors have pause/retry controls; actual playback and audio-focus behavior still need device verification. Bengali translation and tafsir audio are not implemented; suitable recordings and rights remain to be verified.
 
 অ্যাপটি উন্নয়নাধীন। নামাজের সময় ও ধর্মীয় তথ্য ব্যবহারের আগে স্থানীয় নির্ভরযোগ্য উৎসের সঙ্গে মিলিয়ে নিন। কিছু সুবিধার জন্য internet বা অবস্থান অনুমতি প্রয়োজন হতে পারে।
 

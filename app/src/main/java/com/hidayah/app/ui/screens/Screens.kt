@@ -168,36 +168,43 @@ fun TrackerScreen(viewModel: TrackerViewModel) {
     val labels = mapOf("fajr" to "ফজর", "dhuhr" to "যোহর", "asr" to "আসর", "maghrib" to "মাগরিব", "isha" to "এশা", "quran" to "কুরআন তিলাওয়াত", "good_deed" to "একটি ভালো কাজ")
     Page {
         PageHeader("প্রতিদিন একটু ভালো", "দৈনিক আমল ট্র্যাকার", "আপনার ছোট ছোট ভালো কাজের হিসাব রাখুন।")
-        Column(Modifier.fillMaxWidth().background(DeepForest, RoundedCornerShape(20.dp)).padding(20.dp)) {
-            Text("আজ · ${banglaDigits(state.snapshot.date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", banglaLocale)))}", color = Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp)); Text("${banglaDigits(completed.toString())} / ${banglaDigits(habits.size.toString())}", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text("আজকের আমল সম্পন্ন", color = Color(0xFFD9E9DA), fontSize = 13.sp)
-        }
-        state.error?.let { Spacer(Modifier.height(10.dp)); Text("তথ্য সংরক্ষণ বা পড়া যায়নি।", color = Color(0xFFB24838), fontSize = 13.sp) }
-        Spacer(Modifier.height(22.dp)); SectionLabel("আজকের তালিকা", if (state.loading) "লোড হচ্ছে…" else "ট্যাপ করে চিহ্নিত করুন")
-        habits.forEach { habit ->
-            Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).background(CardSurface, RoundedCornerShape(16.dp)).toggleable(value = habit.completed, enabled = !state.loading, role = Role.Checkbox, onValueChange = { viewModel.setCompleted(habit.id, it) }).padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(labels[habit.id] ?: habit.title, modifier = Modifier.weight(1f), color = Ink, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                Box(Modifier.size(28.dp).background(if (habit.completed) Forest else Color.Transparent, CircleShape).border(1.dp, if (habit.completed) Forest else Muted, CircleShape), contentAlignment = Alignment.Center) {
-                    if (habit.completed) Icon(Icons.Outlined.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(17.dp))
+        if (state.loading) {
+            Text("তথ্য লোড হচ্ছে…", color = Muted)
+        } else if (state.readFailed) {
+            Text("তথ্য পড়া যায়নি। আপনার অগ্রগতি এখন দেখানো যাচ্ছে না।", color = Color(0xFFB24838), fontSize = 13.sp)
+            TextButton(onClick = viewModel::retryRead) { Text("আবার চেষ্টা করুন", color = Forest) }
+        } else {
+            Column(Modifier.fillMaxWidth().background(DeepForest, RoundedCornerShape(20.dp)).padding(20.dp)) {
+                Text("আজ · ${banglaDigits(state.snapshot.date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", banglaLocale)))}", color = Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp)); Text("${banglaDigits(completed.toString())} / ${banglaDigits(habits.size.toString())}", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                Text("আজকের আমল সম্পন্ন", color = Color(0xFFD9E9DA), fontSize = 13.sp)
+            }
+            state.error?.let { Spacer(Modifier.height(10.dp)); Text("তথ্য সংরক্ষণ বা পড়া যায়নি।", color = Color(0xFFB24838), fontSize = 13.sp) }
+            Spacer(Modifier.height(22.dp)); SectionLabel("আজকের তালিকা", if (state.loading) "লোড হচ্ছে…" else "ট্যাপ করে চিহ্নিত করুন")
+            habits.forEach { habit ->
+                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).background(CardSurface, RoundedCornerShape(16.dp)).toggleable(value = habit.completed, enabled = !state.loading, role = Role.Checkbox, onValueChange = { viewModel.setCompleted(habit.id, it) }).padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(labels[habit.id] ?: habit.title, modifier = Modifier.weight(1f), color = Ink, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                    Box(Modifier.size(28.dp).background(if (habit.completed) Forest else Color.Transparent, CircleShape).border(1.dp, if (habit.completed) Forest else Muted, CircleShape), contentAlignment = Alignment.Center) {
+                        if (habit.completed) Icon(Icons.Outlined.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(17.dp))
+                    }
                 }
             }
-        }
-        Spacer(Modifier.height(20.dp)); SectionLabel("সাপ্তাহিক অগ্রগতি", "আজসহ সাত দিন")
-        Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(17.dp)).padding(16.dp)) {
-            val totalDone = state.snapshot.history.sumOf { it.completed }
-            val totalPossible = state.snapshot.history.sumOf { it.total }
-            val percent = if (totalPossible == 0) 0 else totalDone * 100 / totalPossible
-            Text("${banglaDigits(percent.toString())}% সম্পন্ন", color = Forest, fontWeight = FontWeight.Bold)
-            LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), color = Forest, trackColor = Sage)
-            state.snapshot.history.forEach { day ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(banglaDigits(day.date.format(DateTimeFormatter.ofPattern("EEE, d MMM", banglaLocale))), color = Ink, fontSize = 12.sp)
-                    Text("${banglaDigits(day.completed.toString())} / ${banglaDigits(day.total.toString())}", color = Forest, fontSize = 12.sp)
+            Spacer(Modifier.height(20.dp)); SectionLabel("সাপ্তাহিক অগ্রগতি", "আজসহ সাত দিন")
+            Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(17.dp)).padding(16.dp)) {
+                val totalDone = state.snapshot.history.sumOf { it.completed }
+                val totalPossible = state.snapshot.history.sumOf { it.total }
+                val percent = if (totalPossible == 0) 0 else totalDone * 100 / totalPossible
+                Text("${banglaDigits(percent.toString())}% সম্পন্ন", color = Forest, fontWeight = FontWeight.Bold)
+                LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), color = Forest, trackColor = Sage)
+                state.snapshot.history.forEach { day ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(banglaDigits(day.date.format(DateTimeFormatter.ofPattern("EEE, d MMM", banglaLocale))), color = Ink, fontSize = 12.sp)
+                        Text("${banglaDigits(day.completed.toString())} / ${banglaDigits(day.total.toString())}", color = Forest, fontSize = 12.sp)
+                    }
                 }
             }
+            Spacer(Modifier.height(12.dp)); Text("তথ্য এই ডিভাইসে সংরক্ষিত থাকে। স্থানীয় সময় অনুযায়ী নতুন দিন শুরু হয়।", color = Muted, fontSize = 12.sp, lineHeight = 19.sp)
+            Spacer(Modifier.height(24.dp))
         }
-        Spacer(Modifier.height(12.dp)); Text("তথ্য এই ডিভাইসে সংরক্ষিত থাকে। স্থানীয় সময় অনুযায়ী নতুন দিন শুরু হয়।", color = Muted, fontSize = 12.sp, lineHeight = 19.sp)
-        Spacer(Modifier.height(24.dp))
     }
 }

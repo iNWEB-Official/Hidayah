@@ -27,24 +27,30 @@ data class TrackerUiState(
     val snapshot: TrackerSnapshot = trackerSnapshot(LocalDate.now(), emptyList()),
     val loading: Boolean = true,
     val error: String? = null,
+    val readFailed: Boolean = false,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TrackerViewModel(private val repository: TrackerRepository) : ViewModel() {
-    private val date = MutableStateFlow(LocalDate.now())
+class TrackerViewModel(
+    private val repository: TrackerRepository,
+    private val today: () -> LocalDate = { LocalDate.now() },
+) : ViewModel() {
+    private val date = MutableStateFlow(today())
+    private val retryRead = MutableStateFlow(0)
     private val writeError = MutableStateFlow<String?>(null)
-    private val snapshots = date.flatMapLatest { day ->
-        repository.observeBetween(day.minusDays(6), day)
+    private val snapshots = combine(date, retryRead) { day, _ -> day }.flatMapLatest { day ->
+        flow { emitAll(repository.observeBetween(day.minusDays(6), day)) }
             .map { TrackerUiState(snapshot = trackerSnapshot(day, it), loading = false) }
             .onStart { emit(TrackerUiState(snapshot = trackerSnapshot(day, emptyList()))) }
-            .catch { emit(TrackerUiState(snapshot = trackerSnapshot(day, emptyList()), loading = false, error = "Couldn't read local progress.")) }
+            .catch { emit(TrackerUiState(snapshot = trackerSnapshot(day, emptyList()), loading = false, error = "Couldn't read local progress.", readFailed = true)) }
     }
-    val state = combine(snapshots, writeError) { snapshot, error -> if (error == null) snapshot else snapshot.copy(error = error) }
+    val state = combine(snapshots, writeError) { snapshot, error -> if (snapshot.readFailed || error == null) snapshot else snapshot.copy(error = error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TrackerUiState())
 
-    fun refreshDate() { date.value = LocalDate.now() }
+    fun refreshDate() { date.value = today() }
+    fun retryRead() { retryRead.update { it + 1 } }
     fun setCompleted(id: String, completed: Boolean) {
-        val today = LocalDate.now()
+        val today = today()
         date.value = today
         viewModelScope.launch {
             try { repository.setCompleted(today, id, completed); writeError.value = null }

@@ -53,10 +53,13 @@ fun SettingsScreen(store: SettingsStore, onBack: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(10.dp))
-            SettingCard("দৈনিক স্মরণবার্তা", "প্রায় রাত ৮টায়; ডিভাইসের সীমাবদ্ধতায় দেরি হতে পারে") {
+            SettingCard("দৈনিক স্মরণবার্তা", "প্রথম লক্ষ্য রাত ৮টা; পরে প্রায় ২৪ ঘণ্টা পরপর। সঠিক সময় নিশ্চিত নয়।") {
                 Switch(checked = settings.reminders, onCheckedChange = { enabled ->
                     note = null
-                    if (!enabled) { DailyReminder.cancel(context); store.setReminders(false) }
+                    if (!enabled) {
+                        store.setReminders(false)
+                        runCatching { DailyReminder.cancel(context) }.onFailure { note = "বন্ধের অনুরোধ সম্পূর্ণ করা যায়নি। আবার চেষ্টা করুন।" }
+                    }
                     else if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
                     else enableReminder()
                 })

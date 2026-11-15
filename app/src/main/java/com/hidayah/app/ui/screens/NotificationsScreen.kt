@@ -38,10 +38,10 @@ fun NotificationsScreen(settings: SettingsStore, onBack: () -> Unit, onSettings:
             Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(18.dp)) {
                 Text("দৈনিক স্মরণবার্তা", color = Forest, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Text(if (options.reminders) "অ্যাপের স্মরণবার্তা চালু আছে।" else "অ্যাপের স্মরণবার্তা বন্ধ আছে।", color = Ink, fontSize = 14.sp)
+                Text(if (options.reminders) "অ্যাপে স্মরণবার্তা চালু করা হয়েছে।" else "অ্যাপে স্মরণবার্তা বন্ধ আছে।", color = Ink, fontSize = 14.sp)
                 if (!permission) Text("ডিভাইসে নোটিফিকেশনের অনুমতি বন্ধ আছে; সিস্টেম সেটিংসে অনুমতি দিন।", color = MaterialTheme.colorScheme.error, fontSize = 13.sp, lineHeight = 21.sp)
                 Spacer(Modifier.height(6.dp))
-                Text("স্মরণবার্তাটি প্রায় রাত ৮টায় আসে; ডিভাইসের নিয়মে দেরি হতে পারে।", color = Muted, fontSize = 13.sp, lineHeight = 21.sp)
+                Text("প্রথম লক্ষ্য রাত ৮টা; পরে প্রায় ২৪ ঘণ্টা পরপর। ডিভাইস, অনুমতি ও সময় অঞ্চল বদলালে সময় পরিবর্তিত হতে পারে; পৌঁছানো নিশ্চিত নয়।", color = Muted, fontSize = 13.sp, lineHeight = 21.sp)
                 TextButton(onClick = onSettings) { Text("স্মরণবার্তা পরিচালনা করুন") }
             }
             Spacer(Modifier.height(12.dp))

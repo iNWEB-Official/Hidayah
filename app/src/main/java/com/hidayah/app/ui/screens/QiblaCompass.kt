@@ -30,6 +30,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.hidayah.app.data.GeoPoint
+import com.hidayah.app.data.normalizeCompassDegrees
+import com.hidayah.app.data.relativeCompassDegrees
 import com.hidayah.app.ui.theme.*
 import kotlin.math.roundToInt
 
@@ -62,20 +64,22 @@ private fun rememberCompassReading(point: GeoPoint): CompassReading {
                 SensorManager.getOrientation(adjusted, orientation)
                 val magneticHeading = Math.toDegrees(orientation[0].toDouble()).toFloat()
                 val declination = GeomagneticField(point.latitude.toFloat(), point.longitude.toFloat(), point.altitudeMeters.toFloat(), System.currentTimeMillis()).declination
-                val trueHeading = (magneticHeading + declination + 360f) % 360f
+                val trueHeading = normalizeCompassDegrees((magneticHeading + declination).toDouble())?.toFloat()
                 reading = CompassReading(trueHeading, event.accuracy, true)
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { reading = reading.copy(accuracy = accuracy) }
         }
         fun start() {
-            if (sensor != null && !manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)) {
-                reading = reading.copy(available = false)
-            }
+            val registered = sensor != null && manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+            reading = CompassReading(available = registered)
         }
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> start()
-                Lifecycle.Event.ON_PAUSE -> manager.unregisterListener(listener)
+                Lifecycle.Event.ON_PAUSE -> {
+                    manager.unregisterListener(listener)
+                    reading = CompassReading(available = sensor != null)
+                }
                 else -> Unit
             }
         }
@@ -90,12 +94,12 @@ private fun rememberCompassReading(point: GeoPoint): CompassReading {
 fun QiblaCompass(point: GeoPoint, bearing: Double) {
     val reading = rememberCompassReading(point)
     val heading = reading.heading
-    val angle = if (heading == null) null else ((bearing - heading + 360.0) % 360.0).toFloat()
+    val angle = heading?.let { relativeCompassDegrees(bearing, it.toDouble())?.toFloat() }
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(22.dp)).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("প্রকৃত উত্তর থেকে ${banglaDigits((bearing.roundToInt() % 360).toString())}°", color = Forest, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
         if (!reading.available) {
             Spacer(Modifier.height(12.dp))
-            Text("এই ডিভাইসে প্রয়োজনীয় কম্পাস সেন্সর নেই। বিশ্বস্ত কম্পাসে উপরের দিক ব্যবহার করুন।", color = Muted, fontSize = 13.sp, lineHeight = 19.sp, textAlign = TextAlign.Center)
+            Text("কম্পাস সেন্সর পাওয়া যায়নি বা চালু করা যায়নি। বিশ্বস্ত কম্পাসে উপরের দিক ব্যবহার করুন।", color = Muted, fontSize = 13.sp, lineHeight = 19.sp, textAlign = TextAlign.Center)
         } else if (angle == null) {
             Spacer(Modifier.height(12.dp))
             Text("কম্পাস সেন্সরের জন্য অপেক্ষা করা হচ্ছে…", color = Muted, fontSize = 13.sp)

@@ -33,6 +33,9 @@ fun RamadanSection(state: PrayerUiState) {
             Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(16.dp)) {
                 Text("আনুমানিক রমজান ${banglaDigits(timetable.hijriYear.toString())} হিজরি", color = Forest, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 Text("বর্তমান বা আসন্ন রমজান · ${state.zone.id}", color = Muted, fontSize = 12.sp)
+                if (timetable.days.any { it.sehriEnd == null || it.iftar == null }) {
+                    Text("কিছু দিনের সময় পাওয়া যায়নি; স্থানীয় বিশ্বস্ত সময়সূচি দেখুন।", color = Color(0xFF9D3E30), fontSize = 12.sp, lineHeight = 18.sp)
+                }
                 TextButton(onClick = { expanded = !expanded }) { Text(if (expanded) "সময়সূচি বন্ধ করুন" else "${banglaDigits(timetable.days.size.toString())} দিনের সময়সূচি দেখুন") }
                 if (expanded) {
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {

@@ -1,3 +1,8 @@
+import java.io.ByteArrayInputStream
+import java.net.URL
+import java.security.MessageDigest
+import java.util.zip.ZipInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +11,50 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
+// Public assets are archived separately. Pin and verify the exact archive before use.
+val hidayahResourceCommit = "fb122bd7670e77b0f10fdb2c2c6b6052975d0b0e"
+val hidayahResourceArchiveSha256 = "77f6f9d37080159f2251228542262a74ccd26a0dc8c9e6b3e8084be8d48fcfc6"
+val hidayahResourceDirectory = layout.buildDirectory.dir("generated/hidayahResources")
+val prepareHidayahResources by tasks.registering {
+    outputs.dir(hidayahResourceDirectory)
+    doLast {
+        val url = URL("https://codeload.github.com/iNWEB-Official/iNWEB-Official-Public-Resources/zip/$hidayahResourceCommit")
+        val connection = url.openConnection().apply {
+            connectTimeout = 30000
+            readTimeout = 120000
+        }
+        val archive = connection.getInputStream().use { it.readBytes() }
+        val digest = MessageDigest.getInstance("SHA-256").digest(archive)
+            .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+        check(digest == hidayahResourceArchiveSha256) { "Hidayah resource archive checksum mismatch" }
+        val outputDir = hidayahResourceDirectory.get().asFile
+        project.delete(outputDir)
+        check(outputDir.mkdirs() || outputDir.isDirectory) { "Cannot create resource output directory" }
+        val prefix = "iNWEB-Official-Public-Resources-$hidayahResourceCommit/Hidayah/app/src/main/res/"
+        var extracted = 0
+        ZipInputStream(ByteArrayInputStream(archive)).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                if (!entry.isDirectory && entry.name.startsWith(prefix)) {
+                    val relative = entry.name.removePrefix(prefix)
+                    val target = outputDir.resolve(relative).canonicalFile
+                    check(target.toPath().startsWith(outputDir.canonicalFile.toPath()) && target != outputDir.canonicalFile) {
+                        "Invalid resource archive path"
+                    }
+                    check(target.parentFile.mkdirs() || target.parentFile.isDirectory)
+                    target.outputStream().use { zip.copyTo(it) }
+                    extracted++
+                }
+                zip.closeEntry()
+            }
+        }
+        check(extracted == 43) { "Unexpected Hidayah resource count: $extracted" }
+    }
+}
+
 android {
+    sourceSets.getByName("main").res.srcDir(hidayahResourceDirectory)
     namespace = "com.hidayah.app"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
@@ -60,3 +108,5 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.room:room-testing:2.6.1")
 }
+
+tasks.named("preBuild").configure { dependsOn(prepareHidayahResources) }

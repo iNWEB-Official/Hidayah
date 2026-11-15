@@ -48,7 +48,7 @@ class RandomQuranDailyValueRepository(
         check(chapters.isNotEmpty()) { "No Quran chapters available" }
         val chapter = chapters[random.nextInt(chapters.size)]
         check(chapter.number in 1..114 && chapter.verses in 1..286) { "Invalid chapter metadata" }
-        val reference = VerseReference(chapter.number, random.nextInt(1, chapter.verses + 1))
+        val reference = VerseReference(chapter.number, random.nextInt(1, chapter.verses + 1), "কুরআন")
         val verse = quran.getVerseText(reference)
         check(verse.reference == reference && verse.arabic.isNotBlank() && verse.bangla.isNotBlank()) {
             "Incomplete or mismatched verse"

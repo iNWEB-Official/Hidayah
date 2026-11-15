@@ -34,7 +34,7 @@ class RandomQuranDailyValueRepositoryTest {
         override suspend fun getVerseText(reference: VerseReference): VerseText {
             verseCalls++
             chosen = reference
-            val actual = if (mismatch) VerseReference(reference.chapter, reference.verse + 1) else reference
+            val actual = if (mismatch) VerseReference(reference.chapter, reference.verse + 1, reference.label) else reference
             return VerseText(actual, "نص عربي", "বাংলা অনুবাদ")
         }
         override suspend fun getChapter(number: Int): QuranChapter = error("not used")

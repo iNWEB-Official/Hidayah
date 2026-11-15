@@ -11,6 +11,10 @@ Hidayah is an Islamic Android app bringing Quran, prayer times and everyday wors
 - দৈনন্দিন আমল tracker, দোয়া ও শিক্ষণীয় বিষয় / Daily worship tracker, duas and learning content
 - দৈনিক আয়াত ও হাদিস দেখার এবং শেয়ার করার সুবিধা / Daily verses and Hadith with sharing
 
+Home অনলাইনে Al Quran Cloud থেকে একটি দৈবচয়িত আয়াত দেখায়; উৎস অনুপলব্ধ হলে বিদ্যমান Firestore দৈনিক কনটেন্ট fallback হিসেবে ব্যবহৃত হয়। একই অ্যাপ প্রক্রিয়ায় দিনের বাকি সময়ে আয়াতটি পুনরায় ব্যবহার করা হয়; ব্যবহারকারী বা নতুন অ্যাপ প্রক্রিয়ায় ভিন্ন হতে পারে। বাংলা অনুবাদ মুহিউদ্দীন খানের; ধর্মীয় ও ডিভাইস যাচাই এখনও প্রয়োজন।
+
+Home shows a randomly selected verse from Al Quran Cloud when available and falls back to existing Firestore daily content on source failure. The selection is reused during the same local day within one app process; it may vary between users or after an app restart. Bengali translation: Muhiuddin Khan. Religious and device review remain necessary.
+
 অ্যাপটি উন্নয়নাধীন। নামাজের সময় ও ধর্মীয় তথ্য ব্যবহারের আগে স্থানীয় নির্ভরযোগ্য উৎসের সঙ্গে মিলিয়ে নিন। কিছু সুবিধার জন্য internet বা অবস্থান অনুমতি প্রয়োজন হতে পারে।
 
 The app is under development. Please check prayer times and religious information against reliable local sources. Some features may require internet access or location permission.

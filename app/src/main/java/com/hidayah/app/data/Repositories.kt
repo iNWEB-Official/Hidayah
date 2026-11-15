@@ -20,7 +20,9 @@ interface DailyValueRepository { fun observe(day: LocalDate): Flow<DailyValueSta
 object AppContainer {
     val quranRepository: QuranRepository = CloudQuranRepository()
     val prayerCalculator: PrayerCalculator = AdhanPrayerCalculator()
-    val dailyValueRepository: DailyValueRepository = FirestoreDailyValueRepository()
+    val dailyValueRepository: DailyValueRepository = RandomQuranDailyValueRepository(
+        quranRepository, FirestoreDailyValueRepository(),
+    )
     val accountRepository: AccountRepository by lazy { FirebaseAccountRepository() }
     @Volatile private var tracker: TrackerRepository? = null
     fun trackerRepository(context: Context): TrackerRepository = tracker ?: synchronized(this) {

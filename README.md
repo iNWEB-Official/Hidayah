@@ -15,13 +15,17 @@ Hidayah is an Islamic Android app bringing Quran, prayer times and everyday wors
 
 The tracker stores progress in a local database. If reading fails, it offers a retry rather than presenting progress as empty. Persistence and day changes still need device testing; uninstalling or clearing app data can remove local records.
 
-নামাজের সময় অবস্থান, ফোনের সময় অঞ্চল ও নির্বাচিত হিসাব পদ্ধতির ওপর নির্ভর করে। অবস্থান বা অনুমতি না পাওয়া গেলে সময় দেখানো হয় না; স্থানীয় নির্ভরযোগ্য সময়সূচির সঙ্গে মিলিয়ে নিন। হিসাবের সেটিংস স্থায়ীভাবে সংরক্ষিত নয়; ফোনে পরীক্ষা বাকি।
+নামাজের সময় অবস্থান, ফোনের সময় অঞ্চল ও নির্বাচিত হিসাব পদ্ধতির ওপর নির্ভর করে। অবস্থান বা অনুমতি না পাওয়া গেলে সময় দেখানো হয় না; স্থানীয় নির্ভরযোগ্য সময়সূচির সঙ্গে মিলিয়ে নিন। পদ্ধতি ও আসরের পছন্দ ডিভাইসে সংরক্ষণের ব্যবস্থা আছে; ফোনে পরীক্ষা বাকি।
 
-Prayer times depend on location, the device time zone and the chosen calculation method. If location or permission is unavailable, times are not shown; check a trusted local timetable. Calculation settings are not persistently saved; device testing is pending.
+Prayer times depend on location, the device time zone and the chosen calculation method. If location or permission is unavailable, times are not shown; check a trusted local timetable. Method and Asr choices are stored on the device; persistence and calculations need device testing.
 
 কিবলার compass sensor ও রমজানের আনুমানিক সূচি স্থানীয়ভাবে যাচাই করা প্রয়োজন; কিছু সময় পাওয়া না গেলে তা ফাঁকা থাকে। দৈনিক reminder-এর প্রথম লক্ষ্য রাত ৮টা, পরে প্রায় ২৪ ঘণ্টার ব্যবধান—নির্দিষ্ট সময় বা delivery নিশ্চিত নয়।
 
 The Qibla compass and estimated Ramadan timetable need device and local-authority verification; unavailable times remain blank. The daily reminder initially targets 8 pm and then runs roughly every 24 hours; exact timing and delivery are not guaranteed.
+
+দৈনিক লেখার ছবি শেয়ারে শিরোনাম, ব্যাখ্যা, উপলব্ধ আরবি, বাংলা লেখা ও সূত্র রাখার ব্যবস্থা আছে; লেখা বেশি বড় হলে টেক্সট শেয়ারের পরামর্শ দেওয়া হয়। অ্যাকাউন্ট ও শেয়ার বাস্তব ফোনে এবং Firebase নিরাপত্তা আলাদাভাবে যাচাই প্রয়োজন।
+
+Daily share images are designed to include the title, reflection, available Arabic, translation and citation; for oversized content, users are prompted to share as text instead. Account and sharing flows need device testing, and Firebase security requires separate review.
 
 Home অনলাইনে Al Quran Cloud থেকে একটি দৈবচয়িত আয়াত দেখায়; উৎস অনুপলব্ধ হলে বিদ্যমান Firestore দৈনিক কনটেন্ট fallback হিসেবে ব্যবহৃত হয়। বিকল্প লেখা, অনুপস্থিত, অসম্পূর্ণ বা error অবস্থায় retry বাটনে আবার চেষ্টা করা যায়; ইন্টারনেট ফিরলেই Quran উৎস স্বয়ংক্রিয়ভাবে পুনরায় চেষ্টা করা হয় না। একই অ্যাপ প্রক্রিয়ায় দিনের বাকি সময়ে আয়াতটি পুনরায় ব্যবহার করা হয়; ব্যবহারকারী বা নতুন অ্যাপ প্রক্রিয়ায় ভিন্ন হতে পারে। বাংলা অনুবাদ মুহিউদ্দীন খানের; ধর্মীয় ও ডিভাইস যাচাই এখনও প্রয়োজন।
 

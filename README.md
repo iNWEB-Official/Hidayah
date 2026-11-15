@@ -19,6 +19,10 @@ The tracker stores progress in a local database. If reading fails, it offers a r
 
 Prayer times depend on location, the device time zone and the chosen calculation method. If location or permission is unavailable, times are not shown; check a trusted local timetable. Calculation settings are not persistently saved; device testing is pending.
 
+কিবলার compass sensor ও রমজানের আনুমানিক সূচি স্থানীয়ভাবে যাচাই করা প্রয়োজন; কিছু সময় পাওয়া না গেলে তা ফাঁকা থাকে। দৈনিক reminder-এর প্রথম লক্ষ্য রাত ৮টা, পরে প্রায় ২৪ ঘণ্টার ব্যবধান—নির্দিষ্ট সময় বা delivery নিশ্চিত নয়।
+
+The Qibla compass and estimated Ramadan timetable need device and local-authority verification; unavailable times remain blank. The daily reminder initially targets 8 pm and then runs roughly every 24 hours; exact timing and delivery are not guaranteed.
+
 Home অনলাইনে Al Quran Cloud থেকে একটি দৈবচয়িত আয়াত দেখায়; উৎস অনুপলব্ধ হলে বিদ্যমান Firestore দৈনিক কনটেন্ট fallback হিসেবে ব্যবহৃত হয়। বিকল্প লেখা, অনুপস্থিত, অসম্পূর্ণ বা error অবস্থায় retry বাটনে আবার চেষ্টা করা যায়; ইন্টারনেট ফিরলেই Quran উৎস স্বয়ংক্রিয়ভাবে পুনরায় চেষ্টা করা হয় না। একই অ্যাপ প্রক্রিয়ায় দিনের বাকি সময়ে আয়াতটি পুনরায় ব্যবহার করা হয়; ব্যবহারকারী বা নতুন অ্যাপ প্রক্রিয়ায় ভিন্ন হতে পারে। বাংলা অনুবাদ মুহিউদ্দীন খানের; ধর্মীয় ও ডিভাইস যাচাই এখনও প্রয়োজন।
 
 Home shows a randomly selected verse from Al Quran Cloud when available and falls back to existing Firestore daily content on source failure. In fallback, missing, invalid or error states, use the retry button to try again; the Quran source is not automatically retried merely because connectivity returns. The selection is reused during the same local day within one app process; it may vary between users or after an app restart. Bengali translation: Muhiuddin Khan. Service availability and rate limits apply; this is not a persistent offline cache. Religious and device review remain necessary.

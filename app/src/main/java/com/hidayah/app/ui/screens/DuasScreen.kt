@@ -37,7 +37,7 @@ fun DuasScreen(initialQuery: String = "", onBack: () -> Unit) {
     val speechState by speech.state.collectAsStateWithLifecycle()
     var category by rememberSaveable { mutableStateOf("সব") }
     var query by rememberSaveable { mutableStateOf(initialQuery) }
-    var actionMessage by remember { mutableStateOf<String?>(null) }
+    var actionError by remember { mutableStateOf<Pair<String, String>?>(null) }
     val results = remember(query, category, favoriteIds) { searchDuas(query, category, favoriteIds) }
     DisposableEffect(owner, speech) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_PAUSE) speech.stop() }
@@ -64,26 +64,26 @@ fun DuasScreen(initialQuery: String = "", onBack: () -> Unit) {
                 Text("যন্ত্রে শোনার কণ্ঠটি কৃত্রিম; উচ্চারণে ভুল হতে পারে। নির্ভরযোগ্য পাঠের সঙ্গে মিলিয়ে নিন।", color = Muted, fontSize = 12.sp, lineHeight = 19.sp)
                 if (speechState.playingId != null) TextButton(onClick = speech::stop) { Text("পাঠ বন্ধ করুন") }
                 speechState.message?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, lineHeight = 19.sp) }
-                actionMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp) }
             }
             if (results.isEmpty()) item {
                 Text(if (category == "পছন্দ" && query.isBlank()) "এখনো কোনো দোয়া পছন্দের তালিকায় নেই।" else "কোনো দোয়া পাওয়া যায়নি। অন্য শব্দ বা বিভাগ দিয়ে চেষ্টা করুন।", color = Muted, fontSize = 14.sp)
             }
             items(results, key = { it.id }) { dua ->
                 DuaCard(dua = dua, isFavorite = dua.id in favoriteIds, playing = speechState.playingId == dua.id,
+                    actionError = actionError?.takeIf { it.first == dua.id }?.second,
                     onFavorite = { favorites.setFavorite(dua.id, it) },
                     onSpeak = { if (speechState.playingId == dua.id) speech.stop() else speech.play(dua) },
                     onShare = {
-                        actionMessage = null
+                        actionError = null
                         runCatching {
                             val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, formatDuaShare(dua))
                             context.startActivity(Intent.createChooser(send, "দোয়া শেয়ার করুন"))
-                        }.onFailure { actionMessage = "শেয়ার করার অ্যাপ পাওয়া যায়নি।" }
+                        }.onFailure { actionError = dua.id to "দোয়া শেয়ার করা যায়নি। আবার চেষ্টা করুন।" }
                     },
                     onSource = {
-                        actionMessage = null
+                        actionError = null
                         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(dua.sourceUrl))) }
-                            .onFailure { actionMessage = "সূত্র খোলার অ্যাপ পাওয়া যায়নি।" }
+                            .onFailure { actionError = dua.id to "সূত্র খোলা যায়নি। আবার চেষ্টা করুন।" }
                     })
             }
             item { Spacer(Modifier.height(14.dp)); Text("আরবি ও সূত্রের পাশাপাশি বাংলা অর্থ ও উচ্চারণ যোগ করা হয়েছে। উচ্চারণ সহায়ক মাত্র; কনটেন্ট প্রকাশের আগে পর্যালোচনা প্রয়োজন।", color = Muted, fontSize = 12.sp, lineHeight = 19.sp) }
@@ -92,7 +92,7 @@ fun DuasScreen(initialQuery: String = "", onBack: () -> Unit) {
 }
 
 @Composable
-private fun DuaCard(dua: DuaItem, isFavorite: Boolean, playing: Boolean, onFavorite: (Boolean) -> Unit, onSpeak: () -> Unit, onShare: () -> Unit, onSource: () -> Unit) {
+private fun DuaCard(dua: DuaItem, isFavorite: Boolean, playing: Boolean, actionError: String?, onFavorite: (Boolean) -> Unit, onSpeak: () -> Unit, onShare: () -> Unit, onSource: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(18.dp)) {
         Text(dua.category, color = Muted, fontSize = 12.sp)
         Spacer(Modifier.height(4.dp))
@@ -105,6 +105,7 @@ private fun DuaCard(dua: DuaItem, isFavorite: Boolean, playing: Boolean, onFavor
         Text("অর্থ: ${dua.meaning}", color = Ink, fontSize = 14.sp, lineHeight = 23.sp)
         Spacer(Modifier.height(8.dp))
         Text("সূত্র: ${dua.source}", color = Muted, fontSize = 12.sp)
+        actionError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, lineHeight = 19.sp) }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Button(onClick = onSpeak, modifier = Modifier.weight(1f)) { Text(if (playing) "থামান" else "যন্ত্রে শুনুন", fontSize = 12.sp) }
             OutlinedButton(onClick = onShare, modifier = Modifier.weight(1f)) { Text("শেয়ার", fontSize = 12.sp) }

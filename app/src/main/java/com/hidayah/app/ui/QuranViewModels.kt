@@ -32,6 +32,10 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
     private val mutableState = MutableStateFlow(ReaderUiState())
     val state: StateFlow<ReaderUiState> = mutableState.asStateFlow()
     private var requestedSurah: Int? = null
+    private var chapterJob: kotlinx.coroutines.Job? = null
+    private val tafsirJobs = mutableMapOf<Int, kotlinx.coroutines.Job>()
+    private val tafsirRequests = mutableMapOf<Int, Long>()
+    private var tafsirSequence = 0L
     // Requests can finish out of order. A generation also distinguishes retrying the same surah.
     private var generation = 0L
 
@@ -39,8 +43,12 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
         if (number !in 1..114 || (requestedSurah == number && !retry)) return
         requestedSurah = number
         val request = ++generation
+        chapterJob?.cancel()
+        tafsirJobs.values.forEach { it.cancel() }
+        tafsirJobs.clear()
+        tafsirRequests.clear()
         mutableState.value = ReaderUiState(loading = true)
-        viewModelScope.launch {
+        chapterJob = viewModelScope.launch {
             try {
                 val chapter = repository.getChapter(number)
                 check(chapter.surah.number == number) { "Unexpected chapter" }
@@ -56,24 +64,40 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
         val number = requestedSurah ?: return
         val chapter = mutableState.value.chapter ?: return
         if (chapter.surah.number != number || chapter.verses.none { it.number == verse }) return
-        val request = generation
         val previous = mutableState.value.tafsirs[verse] ?: TafsirState()
         if (previous.expanded) {
-            setTafsir(verse, previous.copy(expanded = false)); return
+            tafsirRequests.remove(verse)
+            tafsirJobs.remove(verse)?.cancel()
+            setTafsir(verse, previous.copy(expanded = false, loading = false)); return
         }
-        if (previous.data != null || previous.loading) {
+        if (previous.data != null) {
             setTafsir(verse, previous.copy(expanded = true)); return
         }
+        loadTafsir(number, verse)
+    }
+    fun retryTafsir(verse: Int) {
+        val number = requestedSurah ?: return
+        val chapter = mutableState.value.chapter ?: return
+        val current = mutableState.value.tafsirs[verse] ?: return
+        if (chapter.surah.number != number || chapter.verses.none { it.number == verse } || !current.expanded || current.loading) return
+        loadTafsir(number, verse)
+    }
+    private fun loadTafsir(number: Int, verse: Int) {
+        val request = generation
+        val tafsirRequest = ++tafsirSequence
+        tafsirRequests[verse] = tafsirRequest
+        tafsirJobs.remove(verse)?.cancel()
         setTafsir(verse, TafsirState(loading = true, expanded = true))
-        viewModelScope.launch {
+        tafsirJobs[verse] = viewModelScope.launch {
             try {
                 val result = repository.getTafsir(number, verse)
-                if (request != generation) return@launch
+                check("$number:$verse" in result.verseKeys && result.textHtml.isNotBlank() && result.resourceName.isNotBlank()) { "Invalid tafsir" }
+                if (request != generation || tafsirRequests[verse] != tafsirRequest) return@launch
                 val latest = mutableState.value.tafsirs[verse] ?: return@launch
                 setTafsir(verse, latest.copy(loading = false, data = result, error = null))
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
-                if (request != generation) return@launch
+                if (request != generation || tafsirRequests[verse] != tafsirRequest) return@launch
                 val latest = mutableState.value.tafsirs[verse] ?: return@launch
                 setTafsir(verse, latest.copy(loading = false, error = "তাফসির পাওয়া যায়নি। আবার চেষ্টা করুন।"))
             }

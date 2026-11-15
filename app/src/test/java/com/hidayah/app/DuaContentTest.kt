@@ -24,12 +24,10 @@ class DuaContentTest {
         assertEquals("iftar", searchDuas("২৩৫৭", "সব", emptySet()).single().id)
         assertTrue(searchDuas("অজানা-দোয়া", "সব", emptySet()).isEmpty())
     }
-    @Test fun shareIncludesArabicMeaningAndReference() {
-        val dua = DuaItems.first()
-        val share = formatDuaShare(dua)
-        assertTrue(share.contains(dua.arabic))
-        assertTrue(share.contains(dua.pronunciation))
-        assertTrue(share.contains(dua.meaning))
-        assertTrue(share.contains(dua.sourceUrl))
+    @Test fun everySharePreservesAllPublishedTextAndSourceInOrder() {
+        DuaItems.forEach { dua ->
+            val expected = listOf(dua.title, dua.arabic, "উচ্চারণ: ${dua.pronunciation}", "অর্থ: ${dua.meaning}", "সূত্র: ${dua.source}", dua.sourceUrl).joinToString("\n\n")
+            assertEquals(expected, formatDuaShare(dua))
+        }
     }
 }

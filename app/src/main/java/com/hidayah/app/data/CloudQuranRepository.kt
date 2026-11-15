@@ -95,7 +95,10 @@ class CloudQuranRepository(private val requestOverride: ((String) -> JSONObject)
         val obj = request("https://api.quran.com/api/v4/tafsirs/165/by_ayah/$surah:$verse").getJSONObject("tafsir")
         check(obj.getInt("resource_id") == 165 && obj.getInt("language_id") == 20)
         val keys = obj.optJSONObject("verses")?.keys()?.asSequence()?.toList().orEmpty()
-        Tafsir(obj.getString("text"), obj.optString("resource_name", "Tafsir Ahsanul Bayaan"), keys)
+        check("$surah:$verse" in keys) { "Tafsir verse mismatch" }
+        val text = obj.getString("text").trim()
+        check(text.isNotEmpty()) { "Empty tafsir" }
+        Tafsir(text, obj.optString("resource_name", "Tafsir Ahsanul Bayaan").ifBlank { "Tafsir Ahsanul Bayaan" }, keys)
     }
 
     private fun parseSurah(o: JSONObject) = Surah(

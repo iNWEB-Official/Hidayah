@@ -87,13 +87,13 @@ fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -
         when {
             state.loading -> Text("আয়াত লোড হচ্ছে…", Modifier.padding(24.dp), color = Muted)
             state.error != null -> ErrorRetry(state.error!!, { viewModel.load(number, retry = true) }, Modifier.padding(24.dp))
-            chapter != null -> ReaderContent(chapter, player, state.tafsirs, viewModel::toggleTafsir)
+            chapter != null -> ReaderContent(chapter, player, state.tafsirs, viewModel::toggleTafsir, viewModel::retryTafsir)
         }
     }
 }
 
 @Composable
-private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit) {
+private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit, onTafsirRetry: (Int) -> Unit) {
     if (player != null) RecitationControls(player)
     else Text("অডিও এখন পাওয়া যাচ্ছে না; আরবি ও বাংলা পাঠ পড়তে পারবেন। পরে সূরাটি আবার খুলে চেষ্টা করুন।", Modifier.padding(horizontal = 20.dp, vertical = 8.dp), color = Muted, fontSize = 13.sp)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -102,14 +102,14 @@ private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, tafsi
             Spacer(Modifier.height(8.dp))
         }
         items(chapter.verses, key = { it.number }) { verse ->
-            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), audioAvailable = player != null, onTafsir = { onTafsir(verse.number) }, onPlay = { player?.playFrom(verse.number - 1) }, onPlaySingle = { player?.playSingle(verse.number - 1) })
+            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), audioAvailable = player != null, onTafsir = { onTafsir(verse.number) }, onTafsirRetry = { onTafsirRetry(verse.number) }, onPlay = { player?.playFrom(verse.number - 1) }, onPlaySingle = { player?.playSingle(verse.number - 1) })
         }
         item { Spacer(Modifier.height(18.dp)) }
     }
 }
 
 @Composable
-private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirState, audioAvailable: Boolean, onTafsir: () -> Unit, onPlay: () -> Unit, onPlaySingle: () -> Unit) {
+private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirState, audioAvailable: Boolean, onTafsir: () -> Unit, onTafsirRetry: () -> Unit, onPlay: () -> Unit, onPlaySingle: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(18.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("${chapter.surah.number}:${verse.number}", modifier = Modifier.weight(1f), color = Forest, fontWeight = FontWeight.Bold, fontSize = 13.sp)
@@ -125,7 +125,7 @@ private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirSt
         if (tafsir.expanded) {
             when {
                 tafsir.loading -> Text("তাফসির লোড হচ্ছে…", color = Muted, fontSize = 13.sp)
-                tafsir.error != null -> Column { Text(tafsir.error, color = Color(0xFF9D3E30), fontSize = 13.sp); TextButton(onClick = { onTafsir(); onTafsir() }) { Text("আবার চেষ্টা করুন") } }
+                tafsir.error != null -> Column { Text(tafsir.error, color = Color(0xFF9D3E30), fontSize = 13.sp); TextButton(onClick = onTafsirRetry) { Text("আবার চেষ্টা করুন") } }
                 tafsir.data != null -> {
                     Text(tafsir.data.resourceName, color = Forest, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                     if (tafsir.data.verseKeys.size > 1) Text("Covers: ${tafsir.data.verseKeys.joinToString(", ")}", color = Muted, fontSize = 11.sp)

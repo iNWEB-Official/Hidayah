@@ -3,6 +3,7 @@ package com.hidayah.app
 import com.hidayah.app.data.*
 import com.hidayah.app.ui.QuranReaderViewModel
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -26,15 +27,17 @@ class QuranReaderViewModelTest {
         val tafsirs = mutableMapOf<Pair<Int, Int>, CompletableDeferred<Tafsir>>()
         var chapterCalls = 0
         var tafsirCalls = 0
+        var tafsirCancelled = 0
+        var chapterCancelled = 0
         override suspend fun getSurahs(): List<Surah> = emptyList()
         override suspend fun getVerseText(reference: VerseReference): VerseText = error("unused")
         override suspend fun getChapter(number: Int): QuranChapter {
             chapterCalls++
-            return chapters.getValue(number).await()
+            return try { chapters.getValue(number).await() } catch (e: CancellationException) { chapterCancelled++; throw e }
         }
         override suspend fun getTafsir(surah: Int, verse: Int): Tafsir {
             tafsirCalls++
-            return tafsirs.getValue(surah to verse).await()
+            return try { tafsirs.getValue(surah to verse).await() } catch (e: CancellationException) { tafsirCancelled++; throw e }
         }
     }
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
@@ -48,6 +51,7 @@ class QuranReaderViewModelTest {
         val vm = QuranReaderViewModel(repo)
         vm.load(1); runCurrent()
         vm.load(2); runCurrent()
+        assertEquals(1, repo.chapterCancelled)
         current.complete(chapter(2)); runCurrent()
         old.complete(chapter(1)); advanceUntilIdle()
         assertEquals(2, vm.state.value.chapter?.surah?.number)
@@ -95,6 +99,38 @@ class QuranReaderViewModelTest {
         vm.toggleTafsir(1); vm.toggleTafsir(1); advanceUntilIdle()
         assertEquals(1, repo.tafsirCalls)
         assertTrue(vm.state.value.tafsirs[1]!!.expanded)
+    }
+
+    @Test fun failedAndMismatchedTafsirCanBeExplicitlyRetried() = runTest(dispatcher) {
+        val repo = FakeRepository()
+        repo.chapters[1] = CompletableDeferred(chapter(1))
+        repo.tafsirs[1 to 1] = CompletableDeferred(Tafsir("wrong", "source", listOf("2:1")))
+        val vm = QuranReaderViewModel(repo)
+        vm.load(1); runCurrent(); vm.toggleTafsir(1); runCurrent()
+        assertNotNull(vm.state.value.tafsirs[1]?.error)
+        assertNull(vm.state.value.tafsirs[1]?.data)
+        repo.tafsirs[1 to 1] = CompletableDeferred(Tafsir("valid", "source", listOf("1:1")))
+        vm.retryTafsir(1); runCurrent()
+        assertEquals("valid", vm.state.value.tafsirs[1]?.data?.textHtml)
+        assertNull(vm.state.value.tafsirs[1]?.error)
+        assertEquals(2, repo.tafsirCalls)
+    }
+
+    @Test fun closingTafsirCancelsPendingRequestAndReopeningReloads() = runTest(dispatcher) {
+        val repo = FakeRepository()
+        repo.chapters[1] = CompletableDeferred(chapter(1))
+        val pending = CompletableDeferred<Tafsir>()
+        repo.tafsirs[1 to 1] = pending
+        val vm = QuranReaderViewModel(repo)
+        vm.load(1); runCurrent(); vm.toggleTafsir(1); runCurrent()
+        assertTrue(vm.state.value.tafsirs[1]!!.loading)
+        vm.toggleTafsir(1); runCurrent()
+        assertEquals(1, repo.tafsirCancelled)
+        assertFalse(vm.state.value.tafsirs[1]!!.loading)
+        repo.tafsirs[1 to 1] = CompletableDeferred(Tafsir("new", "source", listOf("1:1")))
+        vm.toggleTafsir(1); runCurrent()
+        pending.complete(Tafsir("old", "source", listOf("1:1"))); runCurrent()
+        assertEquals("new", vm.state.value.tafsirs[1]?.data?.textHtml)
     }
 
     @Test fun mismatchedChapterIsNotDisplayedAndCanBeRetried() = runTest(dispatcher) {

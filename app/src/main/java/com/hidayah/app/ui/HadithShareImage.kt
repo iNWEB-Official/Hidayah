@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.net.Uri
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextDirectionHeuristics
@@ -171,6 +172,15 @@ suspend fun createHadithSharePreview(context: Context, value: DailyValue): Hadit
         }
         HadithSharePreview(renderCard(context, value, background), note)
     } finally { background.recycle() }
+}
+
+/** Save only to the destination explicitly chosen by the user in the system document picker. */
+suspend fun saveHadithImage(context: Context, uri: Uri, bitmap: Bitmap) = withContext(Dispatchers.IO) {
+    require(uri.scheme == "content") { "অবৈধ সংরক্ষণ ঠিকানা।" }
+    writeImageOutput(
+        open = { context.contentResolver.openOutputStream(uri, "w") },
+        encode = { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) },
+    )
 }
 
 suspend fun shareHadithImage(context: Context, bitmap: Bitmap) {

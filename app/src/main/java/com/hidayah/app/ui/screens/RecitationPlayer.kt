@@ -22,13 +22,23 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.hidayah.app.data.QuranChapter
+import com.hidayah.app.ui.RecitationPhase
+import com.hidayah.app.ui.RecitationToggleAction
 import com.hidayah.app.ui.recitationQueue
+import com.hidayah.app.ui.recitationToggleAction
 import com.hidayah.app.ui.theme.*
 
 @Stable
 class RecitationState(private val player: ExoPlayer, private val chapter: QuranChapter) {
     var playing by mutableStateOf(false)
         private set
+    var wantsPlayback by mutableStateOf(false)
+        private set
+    var buffering by mutableStateOf(false)
+        private set
+    var ended by mutableStateOf(false)
+        private set
+    val canPause: Boolean get() = wantsPlayback && !ended && error == null
     var index by mutableIntStateOf(0)
         private set
     var error by mutableStateOf<String?>(null)
@@ -37,6 +47,11 @@ class RecitationState(private val player: ExoPlayer, private val chapter: QuranC
 
     val listener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) { playing = isPlaying }
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) { wantsPlayback = playWhenReady }
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            buffering = playbackState == Player.STATE_BUFFERING
+            ended = playbackState == Player.STATE_ENDED
+        }
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             if (mediaItem != null) index = queueStart + player.currentMediaItemIndex.coerceAtLeast(0)
         }
@@ -56,11 +71,16 @@ class RecitationState(private val player: ExoPlayer, private val chapter: QuranC
     fun playSingle(index: Int) = playQueue(index, single = true)
     fun playWholeSurah() = playFrom(0)
     fun toggle() {
-        if (player.isPlaying) player.pause() else {
-            error = null
-            if (player.playbackState == Player.STATE_ENDED) player.seekTo(0, 0L)
-            if (player.playbackState == Player.STATE_IDLE) player.prepare()
-            player.play()
+        val phase = when (player.playbackState) {
+            Player.STATE_IDLE -> RecitationPhase.IDLE
+            Player.STATE_ENDED -> RecitationPhase.ENDED
+            else -> RecitationPhase.OTHER
+        }
+        when (recitationToggleAction(error != null, player.playWhenReady, phase)) {
+            RecitationToggleAction.PAUSE -> player.pause()
+            RecitationToggleAction.RESUME -> player.play()
+            RecitationToggleAction.PREPARE_AND_PLAY -> { error = null; player.prepare(); player.play() }
+            RecitationToggleAction.RESTART_AND_PLAY -> { error = null; player.seekTo(0, 0L); player.play() }
         }
     }
     fun pause() { player.pause() }
@@ -98,8 +118,11 @@ fun RecitationControls(player: RecitationState) {
                 Text("মিশারী আল-আফাসী", color = Forest, fontSize = 14.sp)
                 Text("আয়াত ${banglaDigits((player.index + 1).toString())} · অনলাইনে", color = Muted, fontSize = 12.sp)
             }
-            if (player.playing) OutlinedButton(onClick = player::toggle) { Text("বিরতি") }
-            else Button(onClick = player::toggle) { Text("শুনুন") }
+            if (player.canPause) OutlinedButton(onClick = player::toggle) { Text("বিরতি") }
+            else Button(onClick = player::toggle) { Text(if (player.error != null) "আবার চেষ্টা করুন" else "শুনুন") }
+        }
+        if (player.canPause && !player.playing) {
+            Text(if (player.buffering) "অডিও লোড হচ্ছে…" else "অডিও সাময়িকভাবে অপেক্ষা করছে।", color = Muted, fontSize = 12.sp)
         }
         androidx.compose.material3.TextButton(onClick = player::playWholeSurah) { Text("▶ পুরো সূরা আরবিতে শুনুন") }
         player.error?.let { Text(it, color = androidx.compose.ui.graphics.Color(0xFF9D3E30), fontSize = 12.sp) }

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.concurrent.atomic.AtomicLong
 
 enum class AccountRole { USER, ADMIN, UNVERIFIED }
 data class AccountProfile(val uid: String, val email: String, val emailVerified: Boolean, val role: AccountRole)
@@ -40,27 +39,28 @@ class FirebaseAccountRepository : AccountRepository {
     private val auth: FirebaseAuth get() = FirebaseAuth.getInstance()
     override fun observe(): Flow<AccountProfile?> = callbackFlow {
         var pending: Job? = null
-        val generation = AtomicLong()
+        val guard = AccountRequestGuard()
         val listener = FirebaseAuth.IdTokenListener { firebase ->
-            val request = generation.incrementAndGet()
-            pending?.cancel()
-            val user = firebase.currentUser
-            if (user == null) {
-                trySend(null)
-            } else {
-                trySend(pendingAccountProfile(user.uid, user.email.orEmpty(), user.isEmailVerified))
-                pending = launch {
-                    val claims = try { user.getIdToken(false).await().claims }
-                    catch (e: CancellationException) { throw e }
-                    catch (_: Exception) { null }
-                    if (isCurrentAccountRequest(request, generation.get(), user.uid, firebase.currentUser?.uid)) {
-                        trySend(AccountProfile(user.uid, user.email.orEmpty(), user.isEmailVerified, accountRole(user.isEmailVerified, claims)))
+            guard.onEvent { request ->
+                pending?.cancel()
+                val user = firebase.currentUser
+                if (user == null) {
+                    trySend(null)
+                } else {
+                    trySend(pendingAccountProfile(user.uid, user.email.orEmpty(), user.isEmailVerified))
+                    pending = launch {
+                        val claims = try { user.getIdToken(false).await().claims }
+                        catch (e: CancellationException) { throw e }
+                        catch (_: Exception) { null }
+                        guard.publishIfCurrent(request, user.uid, { firebase.currentUser?.uid }) {
+                            trySend(AccountProfile(user.uid, user.email.orEmpty(), user.isEmailVerified, accountRole(user.isEmailVerified, claims)))
+                        }
                     }
                 }
             }
         }
         auth.addIdTokenListener(listener)
-        awaitClose { pending?.cancel(); auth.removeIdTokenListener(listener) }
+        awaitClose { guard.invalidate { pending?.cancel() }; auth.removeIdTokenListener(listener) }
     }
     override suspend fun signIn(email: String, password: String) { auth.signInWithEmailAndPassword(email, password).await() }
     override suspend fun register(email: String, password: String) { auth.createUserWithEmailAndPassword(email, password).await() }

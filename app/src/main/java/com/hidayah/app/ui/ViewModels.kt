@@ -52,7 +52,8 @@ class PrayerViewModel(
                 val result = locationSource.currentLocation()
                 result.fold(
                     onSuccess = { point ->
-                        mutableState.update { it.copy(point = point, loading = false) }
+                        val validPoint = sanitizeGeoPoint(point) ?: error("Invalid coordinates")
+                        mutableState.update { it.copy(point = validPoint, loading = false) }
                         recalculate(force = true)
                     },
                     onFailure = { error ->

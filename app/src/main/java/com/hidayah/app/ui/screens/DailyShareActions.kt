@@ -50,6 +50,8 @@ internal fun DailyShareActions(value: DailyValue) {
             }
         } else if (uri != null) {
             error = "ছবিটি আর পাওয়া যাচ্ছে না। আবার তৈরি করে সংরক্ষণ করুন।"
+        } else {
+            message = "সংরক্ষণের স্থান নির্বাচন করা হয়নি।"
         }
     }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
@@ -75,7 +77,7 @@ internal fun DailyShareActions(value: DailyValue) {
     message?.let { Text(it, color = Muted, fontSize = 12.sp, lineHeight = 19.sp) }
     preview?.let { result ->
         AlertDialog(
-            onDismissRequest = { preview = null },
+            onDismissRequest = { if (!busy) preview = null },
             title = { Text("শেয়ার করার ছবি") },
             text = {
                 Column {
@@ -83,13 +85,15 @@ internal fun DailyShareActions(value: DailyValue) {
                         modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp), contentScale = ContentScale.Fit)
                     Spacer(Modifier.height(8.dp))
                     Text(result.backgroundNote, color = Muted, fontSize = 12.sp, lineHeight = 19.sp)
+                    Text("সংরক্ষণ বাধাগ্রস্ত হলে নির্বাচিত স্থানে অসম্পূর্ণ ফাইল থেকে যেতে পারে।", color = Muted, fontSize = 12.sp, lineHeight = 19.sp)
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, lineHeight = 19.sp) }
+                    message?.let { Text(it, color = Muted, fontSize = 12.sp, lineHeight = 19.sp) }
                 }
             },
             confirmButton = {
                 Row {
                     TextButton(enabled = !busy, onClick = {
-                        error = null; pendingBitmap = result.bitmap
+                        error = null; message = null; pendingBitmap = result.bitmap
                         try { savePicker.launch("Hidayah-daily.png") }
                         catch (_: Exception) { pendingBitmap = null; error = "সংরক্ষণের স্থান নির্বাচন করা যায়নি।" }
                     }) { Text("সংরক্ষণ") }

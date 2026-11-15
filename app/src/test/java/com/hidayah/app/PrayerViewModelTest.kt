@@ -52,6 +52,16 @@ class PrayerViewModelTest {
         assertTrue(calc.calls.any { it.date == day && it.zone == zone && it.point == point })
     }
 
+    @Test fun invalidCoordinatesDoNotProduceTimes() = runTest(dispatcher) {
+        val calc = FakeCalculator()
+        val vm = PrayerViewModel(calc, LocationSource { Result.success(GeoPoint(Double.NaN, 0.0)) }, dispatcher, { dhaka }, { date })
+        vm.refreshLocation(); runCurrent()
+        assertNull(vm.state.value.point)
+        assertTrue(vm.state.value.prayers.isEmpty())
+        assertNotNull(vm.state.value.error)
+        assertTrue(calc.calls.isEmpty())
+    }
+
     @Test fun failureAndUnexpectedExceptionAllowRetryWithoutStaleTimes() = runTest(dispatcher) {
         var mode = 0
         val vm = PrayerViewModel(FakeCalculator(), LocationSource {

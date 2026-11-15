@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 /** Rendering uses only the exact published text. AI never creates or rewrites quotations. */
@@ -177,8 +179,10 @@ suspend fun createHadithSharePreview(context: Context, value: DailyValue): Hadit
 /** Save only to the destination explicitly chosen by the user in the system document picker. */
 suspend fun saveHadithImage(context: Context, uri: Uri, bitmap: Bitmap) = withContext(Dispatchers.IO) {
     require(uri.scheme == "content") { "অবৈধ সংরক্ষণ ঠিকানা।" }
+    val coroutine = currentCoroutineContext()
     writeImageOutput(
         open = { context.contentResolver.openOutputStream(uri, "w") },
+        ensureActive = { coroutine.ensureActive() },
         encode = { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) },
     )
 }

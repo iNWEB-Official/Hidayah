@@ -21,7 +21,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import com.hidayah.app.data.QuranChapter
+import com.hidayah.app.data.createQuranAudioClient
 import com.hidayah.app.ui.RecitationPhase
 import com.hidayah.app.ui.RecitationToggleAction
 import com.hidayah.app.ui.recitationQueue
@@ -86,12 +89,14 @@ class RecitationState(private val player: ExoPlayer, private val chapter: QuranC
     fun pause() { player.pause() }
 }
 
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun rememberRecitationPlayer(chapter: QuranChapter): RecitationState {
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
     val player = remember(chapter) {
-        ExoPlayer.Builder(context.applicationContext).build().apply {
+        val mediaSource = DefaultMediaSourceFactory(OkHttpDataSource.Factory(createQuranAudioClient()))
+        ExoPlayer.Builder(context.applicationContext).setMediaSourceFactory(mediaSource).build().apply {
             setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_SPEECH).build(), true)
             setHandleAudioBecomingNoisy(true)
         }

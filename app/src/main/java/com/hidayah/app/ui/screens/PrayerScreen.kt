@@ -30,6 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.hidayah.app.data.AsrMethod
 import com.hidayah.app.data.PrayerMethod
+import com.hidayah.app.data.LocationAccuracy
+import com.hidayah.app.data.locationAccuracy
 import com.hidayah.app.ui.PrayerViewModel
 import com.hidayah.app.ui.theme.*
 import java.time.format.DateTimeFormatter
@@ -63,7 +65,7 @@ fun PrayerScreen(viewModel: PrayerViewModel) {
             Spacer(Modifier.height(12.dp))
             Text(if (state.point == null) "নামাজের সময় দেখুন" else "দৈনিক নামাজ", fontFamily = FontFamily.Serif, fontSize = 25.sp, color = Color.White)
             Spacer(Modifier.height(8.dp))
-            Text("নামাজ ও কিবলা হিসাবের জন্য অবস্থান ব্যবহৃত হয়। ফোনের সময় অঞ্চল অবস্থানের সঙ্গে মিলিয়ে নিন।", color = Color(0xFFCDDDD2), fontSize = 13.sp, lineHeight = 20.sp)
+            Text("নামাজ ও কিবলা হিসাবের জন্য অবস্থান ব্যবহৃত হয়। ফোনের সময় অঞ্চল অবস্থানের সঙ্গে মিলিয়ে নিন; জায়গা বদলালে অবস্থান হালনাগাদ করুন।", color = Color(0xFFCDDDD2), fontSize = 13.sp, lineHeight = 20.sp)
             Spacer(Modifier.height(14.dp))
             Button(enabled = !state.loading, onClick = {
                 val fine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -76,9 +78,14 @@ fun PrayerScreen(viewModel: PrayerViewModel) {
             Spacer(Modifier.height(12.dp))
             Text(it, color = MaterialError, fontSize = 13.sp, lineHeight = 19.sp)
         }
-        state.point?.accuracyMeters?.let {
+        state.point?.let { point ->
             Spacer(Modifier.height(10.dp))
-            Text("অবস্থানের নির্ভুলতা: প্রায় ${banglaDigits(it.toInt().toString())} মিটার", color = Muted, fontSize = 12.sp)
+            point.accuracyMeters?.let { Text("ফোনের হিসাবে অবস্থানের আনুমানিক নির্ভুলতা: ${banglaDigits(it.toLong().toString())} মিটার", color = Muted, fontSize = 12.sp) }
+            when (locationAccuracy(point)) {
+                LocationAccuracy.UNKNOWN -> Text("অবস্থানের নির্ভুলতা জানা যায়নি। স্থানীয় সময়সূচি ও কিবলার দিক যাচাই করুন।", color = MaterialError, fontSize = 12.sp, lineHeight = 18.sp)
+                LocationAccuracy.VERY_APPROXIMATE -> Text("অবস্থান প্রায় ১ কিমি বা বেশি অনিশ্চিত হতে পারে। স্থানীয় সময়সূচি ও কিবলার দিক যাচাই করুন।", color = MaterialError, fontSize = 12.sp, lineHeight = 18.sp)
+                LocationAccuracy.APPROXIMATE -> Unit
+            }
         }
         Spacer(Modifier.height(26.dp))
         SectionLabel("হিসাবের সেটিংস")

@@ -21,6 +21,15 @@ internal fun isExpectedRecitationUrl(raw: String, globalVerse: Int): Boolean = t
         uri.rawPath?.matches(Regex("/quran/audio/[0-9]{1,3}/ar\\.alafasy/$globalVerse\\.mp3")) == true
 } catch (_: Exception) { false }
 
+internal fun isAllowedRecitationRequest(raw: String): Boolean {
+    return try {
+        val path = URI(raw).rawPath ?: return false
+        val match = Regex("/quran/audio/[0-9]{1,3}/ar\\.alafasy/([0-9]{1,4})\\.mp3").matchEntire(path) ?: return false
+        val globalVerse = match.groupValues[1].toIntOrNull() ?: return false
+        isExpectedRecitationUrl(raw, globalVerse)
+    } catch (_: Exception) { false }
+}
+
 /** Online-only Quran data. Sources are explicitly identified in the reader. */
 class CloudQuranRepository(private val requestOverride: ((String) -> JSONObject)? = null) : QuranRepository {
     override suspend fun getSurahs(): List<Surah> = withContext(Dispatchers.IO) {

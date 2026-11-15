@@ -15,6 +15,10 @@ Home অনলাইনে Al Quran Cloud থেকে একটি দৈবচ
 
 Home shows a randomly selected verse from Al Quran Cloud when available and falls back to existing Firestore daily content on source failure. The selection is reused during the same local day within one app process; it may vary between users or after an app restart. Bengali translation: Muhiuddin Khan. Service availability and rate limits apply; this is not a persistent offline cache. Religious and device review remain necessary.
 
+কুরআন reader অনলাইন নির্ভর। Arabic, বাংলা ও অডিও edition-এর সূরা ও আয়াতের পরিচয় মেলে কি না যাচাই করা হয়; অডিও edition না পাওয়া গেলেও বর্তমানে সূরা লোড ব্যর্থ হতে পারে। ফোনে ব্যবহার, ধর্মীয় নির্ভুলতা ও পৃথক কনটেন্টের ব্যবহারাধিকার পর্যালোচনা বাকি।
+
+The Quran reader is online-only. It checks chapter and verse identities across Arabic, Bengali and audio editions; currently an unavailable audio edition can also prevent chapter loading. Device, religious accuracy and individual content-rights reviews are pending.
+
 অ্যাপটি উন্নয়নাধীন। নামাজের সময় ও ধর্মীয় তথ্য ব্যবহারের আগে স্থানীয় নির্ভরযোগ্য উৎসের সঙ্গে মিলিয়ে নিন। কিছু সুবিধার জন্য internet বা অবস্থান অনুমতি প্রয়োজন হতে পারে।
 
 The app is under development. Please check prayer times and religious information against reliable local sources. Some features may require internet access or location permission.

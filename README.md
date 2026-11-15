@@ -13,7 +13,7 @@ Hidayah is an Islamic Android app bringing Quran, prayer times and everyday wors
 
 আমল tracker-এর তথ্য ডিভাইসের local database-এ রাখা হয়। তথ্য পড়তে সমস্যা হলে অগ্রগতি দেখানোর বদলে পুনরায় চেষ্টা করার সুযোগ থাকে। বাস্তব ফোনে persistence ও দিন বদল যাচাই এখনও বাকি; uninstall বা data clear করলে local তথ্য হারাতে পারে।
 
-The tracker stores progress in a local database. If reading fails, it offers a retry rather than presenting progress as empty. Persistence and day changes still need device testing; uninstalling or clearing app data can remove local records.
+The tracker stores progress in a local database. If reading fails, it offers a retry rather than presenting progress as empty. Writes are queued, and a tap on an outdated day's display prompts a refresh instead of recording it against a new day. Persistence and day changes still need device testing; uninstalling or clearing app data can remove local records.
 
 দোয়ার পছন্দ ও অ্যাপের কিছু সেটিংস ডিভাইসে রাখা হয়; পড়া বা সংরক্ষণে সমস্যা হলে সতর্কবার্তা দেখানোর ব্যবস্থা আছে। বাস্তব ফোনে সংরক্ষণ ও পুনরায় খোলা পরীক্ষা বাকি।
 
@@ -37,7 +37,7 @@ Home shows a randomly selected verse from Al Quran Cloud when available and fall
 
 কুরআন reader অনলাইন নির্ভর। Arabic, বাংলা ও অডিও edition-এর সূরা ও আয়াতের পরিচয় মেলে কি না যাচাই করা হয়। অডিও edition অনুপলব্ধ বা অবৈধ হলে আলাদাভাবে শুধু Arabic ও বাংলা পাঠ আনার চেষ্টা করা হয়; পাঠের উৎসও অনুপলব্ধ হলে error দেখায়। ফোনে ব্যবহার, ধর্মীয় নির্ভুলতা ও পৃথক কনটেন্টের ব্যবহারাধিকার পর্যালোচনা বাকি।
 
-The Quran reader is online-only. It checks chapter and verse identities across Arabic, Bengali and audio editions. If the audio edition is unavailable or invalid, it tries to fetch the Arabic and Bengali text separately; it still needs a working text source. Device, religious accuracy and individual content-rights reviews are pending.
+The Quran reader is online-only. It checks chapter and verse identities across Arabic, Bengali and audio editions. The initial audio URL must match the expected reciter CDN and verse; provider URL changes can make audio unavailable. If the audio edition is unavailable or invalid, it tries to fetch the Arabic and Bengali text separately; it still needs a working text source. Device, religious accuracy and individual content-rights reviews are pending.
 
 আরবি অডিওতে শুধু একটি আয়াত, নির্বাচিত আয়াত থেকে সূরার শেষ পর্যন্ত বা প্রথম থেকে পুরো সূরা শোনার নিয়ন্ত্রণ রয়েছে। এই পরিবর্তন বাস্তব ডিভাইসে যাচাই বাকি। বাংলা অনুবাদ ও তাফসির অডিও এখনও যুক্ত নয়; উপযুক্ত রেকর্ডিং ও ব্যবহারাধিকার যাচাই প্রয়োজন।
 

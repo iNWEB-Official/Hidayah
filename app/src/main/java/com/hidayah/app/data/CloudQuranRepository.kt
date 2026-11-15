@@ -8,7 +8,18 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
+import java.util.Locale
+
+/** Strictly accept the expected reciter CDN and verse number; other URLs fall back to text. */
+internal fun isExpectedRecitationUrl(raw: String, globalVerse: Int): Boolean = try {
+    val uri = URI(raw)
+    globalVerse in 1..6236 && uri.scheme?.lowercase(Locale.ROOT) == "https" &&
+        uri.host?.lowercase(Locale.ROOT) == "cdn.islamic.network" && uri.userInfo == null &&
+        uri.port in listOf(-1, 443) && uri.rawQuery == null && uri.rawFragment == null &&
+        uri.rawPath?.matches(Regex("/quran/audio/[0-9]{1,3}/ar\\.alafasy/$globalVerse\\.mp3")) == true
+} catch (_: Exception) { false }
 
 /** Online-only Quran data. Sources are explicitly identified in the reader. */
 class CloudQuranRepository(private val requestOverride: ((String) -> JSONObject)? = null) : QuranRepository {
@@ -69,7 +80,7 @@ class CloudQuranRepository(private val requestOverride: ((String) -> JSONObject)
             val banglaText = banglaVerse.getString("text")
             check(arabicText.isNotBlank() && banglaText.isNotBlank()) { "Empty verse text" }
             val uri = recording?.getString("audio")
-            if (uri != null) check(uri.startsWith("https://")) { "Untrusted audio URL" }
+            if (uri != null) check(isExpectedRecitationUrl(uri, arabicVerse.getInt("number"))) { "Unexpected audio URL or verse" }
             QuranVerse(index, arabicText, banglaText, uri)
         }
         return QuranChapter(surah, verses)
@@ -101,10 +112,15 @@ class CloudQuranRepository(private val requestOverride: ((String) -> JSONObject)
         Tafsir(text, obj.optString("resource_name", "Tafsir Ahsanul Bayaan").ifBlank { "Tafsir Ahsanul Bayaan" }, keys)
     }
 
-    private fun parseSurah(o: JSONObject) = Surah(
-        o.getInt("number"), o.getString("englishName"), o.getString("englishNameTranslation"),
-        o.getInt("numberOfAyahs"), o.getString("name"),
-    )
+    private fun parseSurah(o: JSONObject): Surah {
+        val surah = Surah(
+            o.getInt("number"), o.getString("englishName"), o.getString("englishNameTranslation"),
+            o.getInt("numberOfAyahs"), o.getString("name"),
+        )
+        check(surah.number in 1..114 && surah.verses in 1..286 && surah.name.isNotBlank() &&
+            surah.meaning.isNotBlank() && surah.arabicName.isNotBlank()) { "Invalid surah metadata" }
+        return surah
+    }
 
     /** All endpoint URLs are fixed HTTPS URLs; do not follow redirects to untrusted schemes. */
     private fun request(url: String): JSONObject {

@@ -1,5 +1,7 @@
 package com.hidayah.app.ui.screens
 
+import android.app.NotificationManager
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,7 +18,16 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.hidayah.app.data.SettingsStore
+import com.hidayah.app.reminders.DAILY_REMINDER_CHANNEL_ID
+import com.hidayah.app.reminders.ReminderChannelState
+import com.hidayah.app.reminders.reminderChannelState
 import com.hidayah.app.ui.theme.*
+
+private fun readReminderChannel(context: Context): ReminderChannelState = try {
+    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val channel = manager.getNotificationChannel(DAILY_REMINDER_CHANNEL_ID)
+    reminderChannelState(channel != null, channel?.importance)
+} catch (_: Exception) { ReminderChannelState.UNKNOWN }
 
 @Composable
 fun NotificationsScreen(settings: SettingsStore, onBack: () -> Unit, onSettings: () -> Unit) {
@@ -24,9 +35,13 @@ fun NotificationsScreen(settings: SettingsStore, onBack: () -> Unit, onSettings:
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
     var permission by remember(context) { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
+    var channel by remember(context) { mutableStateOf(readReminderChannel(context)) }
     DisposableEffect(owner, context) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) permission = NotificationManagerCompat.from(context).areNotificationsEnabled()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                permission = NotificationManagerCompat.from(context).areNotificationsEnabled()
+                channel = readReminderChannel(context)
+            }
         }
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
@@ -40,6 +55,9 @@ fun NotificationsScreen(settings: SettingsStore, onBack: () -> Unit, onSettings:
                 Spacer(Modifier.height(8.dp))
                 Text(if (options.reminders) "অ্যাপে স্মরণবার্তা চালু করা হয়েছে।" else "অ্যাপে স্মরণবার্তা বন্ধ আছে।", color = Ink, fontSize = 14.sp)
                 if (!permission) Text("ডিভাইসে নোটিফিকেশনের অনুমতি বন্ধ আছে; সিস্টেম সেটিংসে অনুমতি দিন।", color = MaterialTheme.colorScheme.error, fontSize = 13.sp, lineHeight = 21.sp)
+                if (channel == ReminderChannelState.BLOCKED) Text("দৈনিক স্মরণ চ্যানেল বন্ধ আছে; ডিভাইসের নোটিফিকেশন সেটিংসে যাচাই করুন।", color = MaterialTheme.colorScheme.error, fontSize = 13.sp, lineHeight = 21.sp)
+                if (options.reminders && channel == ReminderChannelState.NOT_CREATED) Text("প্রথম স্মরণবার্তার আগে চ্যানেল তৈরি নাও হতে পারে।", color = Muted, fontSize = 12.sp)
+                if (options.reminders && channel == ReminderChannelState.UNKNOWN) Text("স্মরণবার্তার চ্যানেলের অবস্থা যাচাই করা যায়নি।", color = Muted, fontSize = 12.sp)
                 Spacer(Modifier.height(6.dp))
                 Text("প্রথম লক্ষ্য রাত ৮টা; পরে প্রায় ২৪ ঘণ্টা পরপর। ডিভাইস, অনুমতি ও সময় অঞ্চল বদলালে সময় পরিবর্তিত হতে পারে; পৌঁছানো নিশ্চিত নয়।", color = Muted, fontSize = 13.sp, lineHeight = 21.sp)
                 TextButton(onClick = onSettings) { Text("স্মরণবার্তা পরিচালনা করুন") }

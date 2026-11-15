@@ -179,10 +179,10 @@ fun TrackerScreen(viewModel: TrackerViewModel) {
                 Spacer(Modifier.height(8.dp)); Text("${banglaDigits(completed.toString())} / ${banglaDigits(habits.size.toString())}", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 Text("আজকের আমল সম্পন্ন", color = Color(0xFFD9E9DA), fontSize = 13.sp)
             }
-            state.error?.let { Spacer(Modifier.height(10.dp)); Text("তথ্য সংরক্ষণ বা পড়া যায়নি।", color = Color(0xFFB24838), fontSize = 13.sp) }
-            Spacer(Modifier.height(22.dp)); SectionLabel("আজকের তালিকা", if (state.loading) "লোড হচ্ছে…" else "ট্যাপ করে চিহ্নিত করুন")
+            state.error?.let { Spacer(Modifier.height(10.dp)); Text(it, color = Color(0xFFB24838), fontSize = 13.sp) }
+            Spacer(Modifier.height(22.dp)); SectionLabel("আজকের তালিকা", if (state.pendingWrites.isNotEmpty()) "সংরক্ষণ হচ্ছে…" else "ট্যাপ করে চিহ্নিত করুন")
             habits.forEach { habit ->
-                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).background(CardSurface, RoundedCornerShape(16.dp)).toggleable(value = habit.completed, enabled = !state.loading, role = Role.Checkbox, onValueChange = { viewModel.setCompleted(habit.id, it) }).padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).background(CardSurface, RoundedCornerShape(16.dp)).toggleable(value = habit.completed, enabled = habit.id !in state.pendingWrites, role = Role.Checkbox, onValueChange = { viewModel.setCompleted(habit.id, it) }).padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(labels[habit.id] ?: habit.title, modifier = Modifier.weight(1f), color = Ink, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                     Box(Modifier.size(28.dp).background(if (habit.completed) Forest else Color.Transparent, CircleShape).border(1.dp, if (habit.completed) Forest else Muted, CircleShape), contentAlignment = Alignment.Center) {
                         if (habit.completed) Icon(Icons.Outlined.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(17.dp))

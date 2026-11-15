@@ -13,7 +13,7 @@ class CloudQuranChapterParsingTest {
         val ayahs = JSONArray()
         for (i in 1..2) {
             ayahs.put(JSONObject().put("numberInSurah", i).put("number", 100 + i)
-                .put("text", "text $i").put("audio", "https://example.com/$i.mp3"))
+                .put("text", "text $i").put("audio", "https://cdn.islamic.network/quran/audio/128/ar.alafasy/${100 + i}.mp3"))
         }
         return JSONObject().put("edition", JSONObject().put("identifier", id))
             .put("number", 2).put("numberOfAyahs", 2).put("englishName", "Al-Baqarah")
@@ -44,7 +44,7 @@ class CloudQuranChapterParsingTest {
         val repo = CloudQuranRepository { _ -> calls++; data() }
         val result = repo.getChapter(2)
         assertEquals(1, calls)
-        assertEquals(listOf("https://example.com/1.mp3", "https://example.com/2.mp3"), result.verses.map { it.audioUrl })
+        assertEquals(listOf("https://cdn.islamic.network/quran/audio/128/ar.alafasy/101.mp3", "https://cdn.islamic.network/quran/audio/128/ar.alafasy/102.mp3"), result.verses.map { it.audioUrl })
     }
 
     @Test fun audioEditionFailureFallsBackToValidatedText() = runTest {
@@ -92,6 +92,39 @@ class CloudQuranChapterParsingTest {
             fail("Cancellation must propagate")
         } catch (_: CancellationException) { }
         assertEquals(1, calls)
+    }
+
+    @Test fun badAudioHostPathOrVerseFallsBackToText() = runTest {
+        val invalidUrls = listOf(
+            "https://example.com/quran/audio/128/ar.alafasy/101.mp3",
+            "https://cdn.islamic.network/quran/audio/128/ar.alafasy/102.mp3",
+            "https://user@cdn.islamic.network/quran/audio/128/ar.alafasy/101.mp3",
+            "https://cdn.islamic.network/quran/audio/128/ar.alafasy/101.mp3?x=1",
+            "http://cdn.islamic.network/quran/audio/128/ar.alafasy/101.mp3",
+        )
+        for (url in invalidUrls) {
+            val broken = data()
+            rootEntry(broken, 2).getJSONArray("ayahs").getJSONObject(0).put("audio", url)
+            var calls = 0
+            val repo = CloudQuranRepository { _ -> calls++; if (calls == 1) broken else textOnly() }
+            assertTrue(repo.getChapter(2).verses.all { it.audioUrl == null })
+            assertEquals(2, calls)
+        }
+    }
+
+    @Test fun surahListRejectsIncompleteOrInvalidMetadata() = runTest {
+        fun surah(n: Int) = JSONObject().put("number", n).put("numberOfAyahs", 7)
+            .put("englishName", "Surah $n").put("englishNameTranslation", "Meaning").put("name", "Arabic")
+        fun root() = JSONObject().put("data", JSONArray().apply { (1..114).forEach { put(surah(it)) } })
+        assertEquals(114, CloudQuranRepository { root() }.getSurahs().size)
+        val invalid = root()
+        invalid.getJSONArray("data").getJSONObject(10).put("numberOfAyahs", 0)
+        try { CloudQuranRepository { invalid }.getSurahs(); fail("Invalid metadata must be rejected") }
+        catch (_: IllegalStateException) { }
+        val incomplete = root()
+        incomplete.getJSONArray("data").remove(113)
+        try { CloudQuranRepository { incomplete }.getSurahs(); fail("Incomplete list must be rejected") }
+        catch (_: IllegalStateException) { }
     }
 
     @Test fun wrongBanglaSurahIsRejected() {

@@ -16,11 +16,8 @@ class FirestoreDailyValueRepository : DailyValueRepository {
                 .addSnapshotListener(MetadataChanges.INCLUDE) { snapshot, error ->
                     if (error != null) {
                         trySend(DailyValueStatus.Error("Unable to load today's value. Check your connection, Firestore API/database and read rules."))
-                    } else if (snapshot == null || !snapshot.exists()) {
-                        trySend(DailyValueStatus.Missing(snapshot?.metadata?.isFromCache == true))
                     } else {
-                        val parsed = parseDailyValue(snapshot.data.orEmpty())
-                        trySend(if (parsed == null) DailyValueStatus.Invalid else DailyValueStatus.Available(parsed, snapshot.metadata.isFromCache))
+                        trySend(dailyValueFromSnapshot(snapshot?.exists(), snapshot?.metadata?.isFromCache == true, snapshot?.data.orEmpty()))
                     }
                 }
         } catch (_: Exception) {

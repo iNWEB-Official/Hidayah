@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -108,6 +109,45 @@ class TrackerViewModelTest {
         vm.retryRead(); runCurrent()
         assertFalse(vm.state.value.readFailed)
         assertFalse(vm.state.value.loading)
+    }
+
+    @Test fun rapidWritesAreSerializedInRequestOrder() = runTest(dispatcher) {
+        val gate = CompletableDeferred<Unit>()
+        val started = mutableListOf<Boolean>()
+        val rows = MutableStateFlow<List<DeedRecord>>(emptyList())
+        val repo = object : TrackerRepository {
+            override fun observeBetween(first: LocalDate, last: LocalDate): Flow<List<DeedRecord>> = rows
+            override suspend fun setCompleted(day: LocalDate, id: String, completed: Boolean) {
+                started.add(completed)
+                if (completed) gate.await()
+                rows.value = listOf(DeedRecord(day.toString(), id, completed))
+            }
+        }
+        val vm = TrackerViewModel(repo)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.state.collect() }
+        runCurrent()
+        vm.setCompleted("fajr", true); vm.setCompleted("fajr", false); runCurrent()
+        assertEquals(listOf(true), started)
+        assertTrue("fajr" in vm.state.value.pendingWrites)
+        gate.complete(Unit); runCurrent()
+        assertEquals(listOf(true, false), started)
+        assertFalse(vm.state.value.snapshot.habits.single { it.id == "fajr" }.completed)
+        assertTrue(vm.state.value.pendingWrites.isEmpty())
+    }
+
+    @Test fun staleDayTapRefreshesWithoutWritingToNewDay() = runTest(dispatcher) {
+        var day = LocalDate.of(2026, 12, 31)
+        val repo = FakeRepository()
+        val vm = TrackerViewModel(repo) { day }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.state.collect() }
+        runCurrent()
+        day = day.plusDays(1)
+        vm.setCompleted("fajr", true); runCurrent()
+        assertTrue(repo.records.value.isEmpty())
+        assertEquals(day, vm.state.value.snapshot.date)
+        assertNotNull(vm.state.value.error)
+        vm.setCompleted("fajr", true); runCurrent()
+        assertTrue(repo.records.value.any { it.day == day.toString() && it.completed })
     }
 
     @Test fun dayChangeCancelsOldObservation() = runTest(dispatcher) {

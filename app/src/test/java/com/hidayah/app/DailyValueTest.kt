@@ -4,6 +4,8 @@ import com.hidayah.app.data.formatDailyValueShare
 import com.hidayah.app.data.dailyValueImageBlocks
 import com.hidayah.app.data.fitsShareImageTextLimit
 import com.hidayah.app.data.ShareImageTextStyle
+import com.hidayah.app.data.DailyValueStatus
+import com.hidayah.app.data.dailyValueFromSnapshot
 import com.hidayah.app.data.parseDailyValue
 import org.junit.Assert.*
 import org.junit.Test
@@ -69,6 +71,15 @@ class DailyValueTest {
         assertNull(value.shareBackgroundUrl)
     }
 
+    @Test fun snapshotStatesDoNotConfuseMissingCacheInvalidAndUnavailable() {
+        assertTrue(dailyValueFromSnapshot(null, false) is DailyValueStatus.Error)
+        assertEquals(DailyValueStatus.Missing(true), dailyValueFromSnapshot(false, true))
+        assertEquals(DailyValueStatus.Missing(false), dailyValueFromSnapshot(false, false))
+        assertEquals(DailyValueStatus.Invalid, dailyValueFromSnapshot(true, false, base - "reference"))
+        val available = dailyValueFromSnapshot(true, true, base) as DailyValueStatus.Available
+        assertTrue(available.fromCache)
+        assertEquals("সূত্র", available.value.reference)
+    }
     @Test fun imageBlocksContainPublishedReflectionArabicTranslationAndCitation() {
         val value = parseDailyValue(base + ("referenceArabic" to "نص عربي"))!!
         val blocks = dailyValueImageBlocks(value)

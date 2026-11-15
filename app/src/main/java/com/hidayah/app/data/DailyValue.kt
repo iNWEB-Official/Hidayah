@@ -52,6 +52,13 @@ fun dailyValueImageBlocks(value: DailyValue): List<ShareImageTextBlock> = buildL
 fun fitsShareImageTextLimit(value: DailyValue, limit: Long = 4000L): Boolean =
     dailyValueImageBlocks(value).sumOf { it.text.length.toLong() } <= limit
 
+/** Snapshot null is an error, not proof that a document was never published. */
+fun dailyValueFromSnapshot(exists: Boolean?, fromCache: Boolean, fields: Map<String, Any?> = emptyMap()): DailyValueStatus = when (exists) {
+    null -> DailyValueStatus.Error("Daily value snapshot unavailable.")
+    false -> DailyValueStatus.Missing(fromCache)
+    true -> parseDailyValue(fields)?.let { DailyValueStatus.Available(it, fromCache) } ?: DailyValueStatus.Invalid
+}
+
 sealed interface DailyValueStatus {
     data object Loading : DailyValueStatus
     data class Available(val value: DailyValue, val fromCache: Boolean, val isFallback: Boolean = false) : DailyValueStatus

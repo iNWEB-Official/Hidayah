@@ -23,10 +23,13 @@ class DailyReminderWorker(context: Context, params: WorkerParameters) : Worker(c
         val permission = Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         if (!mayPostReminder(enabled, NotificationManagerCompat.from(applicationContext).areNotificationsEnabled(), permission)) return Result.success()
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= 26) manager.createNotificationChannel(NotificationChannel("daily_reminder", "দৈনিক স্মরণ", NotificationManager.IMPORTANCE_DEFAULT))
+        if (Build.VERSION.SDK_INT >= 26) {
+            manager.createNotificationChannel(NotificationChannel(DAILY_REMINDER_CHANNEL_ID, "দৈনিক স্মরণ", NotificationManager.IMPORTANCE_DEFAULT))
+            if (manager.getNotificationChannel(DAILY_REMINDER_CHANNEL_ID)?.importance == NotificationManager.IMPORTANCE_NONE) return Result.success()
+        }
         val intent = Intent(applicationContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pending = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val notification = NotificationCompat.Builder(applicationContext, "daily_reminder")
+        val notification = NotificationCompat.Builder(applicationContext, DAILY_REMINDER_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle("হিদায়া")
             .setContentText("আজকের আমল ও মূল্যবোধের জন্য একটু সময় রাখুন।")
             .setAutoCancel(true).setContentIntent(pending).build()

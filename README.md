@@ -15,8 +15,19 @@ Hidayah is an Islamic Android app bringing Quran, prayer times and everyday wors
 
 The app is under development. Please check prayer times and religious information against reliable local sources. Some features may require internet access or location permission.
 
-## প্রকাশ্য resources | Public resources
+## প্রয়োজনীয় লিংক | Project links
 
-[Hidayah public resources](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah)
+| বিষয় / Item | লিংক / Link | Access |
+|---|---|---|
+| অ্যাপের source code | [Hidayah source](https://github.com/iNWEB-Official/Hidayah/tree/main/app/src) | Public |
+| Development নথির তালিকা | [Documentation index](https://github.com/iNWEB-Official/iNWEB-Official-Documentation/blob/main/Hidayah/INDEX.md) | Private |
+| Development README | [Private README](https://github.com/iNWEB-Official/iNWEB-Official-Documentation/blob/main/Hidayah/README.md) | Private |
+| সব প্রকাশ্য resources | [Hidayah resources](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah) | Public |
+| ছবি ও background | [Hadith images ও banner](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah/app/src/main/res/drawable-nodpi) | Public |
+| Logo ও branding | [Hidayah branding](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah/branding) | Public |
+| Font ও license | [Fonts](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah/app/src/main/res/font) · [Noto license](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/blob/main/Hidayah/NOTO-FONT-LICENSE.txt) | Public |
+| ব্যক্তিগত backup | [Hidayah Drive folder](https://drive.google.com/drive/folders/1vGat2kLPYfPCuOpfxfCQB3p9piMeFg_Q) | Restricted |
+
+Private GitHub links require an account with repository access. The Drive backup requires the appropriate Google account and permissions. Links do not grant access or change sharing settings.
 
 © 2026 iNWEB Official. All rights reserved.

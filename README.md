@@ -19,6 +19,10 @@ Home shows a randomly selected verse from Al Quran Cloud when available and fall
 
 The Quran reader is online-only. It checks chapter and verse identities across Arabic, Bengali and audio editions; currently an unavailable audio edition can also prevent chapter loading. Device, religious accuracy and individual content-rights reviews are pending.
 
+আরবি অডিওতে শুধু একটি আয়াত, নির্বাচিত আয়াত থেকে সূরার শেষ পর্যন্ত বা প্রথম থেকে পুরো সূরা শোনার নিয়ন্ত্রণ রয়েছে। এই পরিবর্তন বাস্তব ডিভাইসে যাচাই বাকি। বাংলা অনুবাদ ও তাফসির অডিও এখনও যুক্ত নয়; উপযুক্ত রেকর্ডিং ও ব্যবহারাধিকার যাচাই প্রয়োজন।
+
+Arabic recitation controls support a single ayah, playback from a selected ayah to the end, or the whole surah. Device playback verification remains pending. Bengali translation and tafsir audio are not implemented; suitable recordings and rights remain to be verified.
+
 অ্যাপটি উন্নয়নাধীন। নামাজের সময় ও ধর্মীয় তথ্য ব্যবহারের আগে স্থানীয় নির্ভরযোগ্য উৎসের সঙ্গে মিলিয়ে নিন। কিছু সুবিধার জন্য internet বা অবস্থান অনুমতি প্রয়োজন হতে পারে।
 
 The app is under development. Please check prayer times and religious information against reliable local sources. Some features may require internet access or location permission.

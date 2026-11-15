@@ -21,7 +21,7 @@ class QuranViewModel(private val repository: QuranRepository) : ViewModel() {
             mutableState.update { it.copy(loading = true, error = null) }
             try { val surahs = repository.getSurahs(); mutableState.update { it.copy(loading = false, surahs = surahs) } }
             catch (e: CancellationException) { throw e }
-            catch (_: Exception) { mutableState.update { it.copy(loading = false, error = "Could not load surahs. Check your connection and retry.") } }
+            catch (_: Exception) { mutableState.update { it.copy(loading = false, error = "সূরার তালিকা পাওয়া যায়নি। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন।") } }
         }
     }
 }
@@ -43,10 +43,11 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
         viewModelScope.launch {
             try {
                 val chapter = repository.getChapter(number)
+                check(chapter.surah.number == number) { "Unexpected chapter" }
                 if (request == generation) mutableState.update { it.copy(loading = false, chapter = chapter) }
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
-                if (request == generation) mutableState.update { it.copy(loading = false, error = "Could not load this surah. Check your connection and retry.") }
+                if (request == generation) mutableState.update { it.copy(loading = false, error = "সূরাটি পাওয়া যায়নি। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন।") }
             }
         }
     }
@@ -74,7 +75,7 @@ class QuranReaderViewModel(private val repository: QuranRepository) : ViewModel(
             catch (_: Exception) {
                 if (request != generation) return@launch
                 val latest = mutableState.value.tafsirs[verse] ?: return@launch
-                setTafsir(verse, latest.copy(loading = false, error = "Tafsir unavailable. Tap to retry."))
+                setTafsir(verse, latest.copy(loading = false, error = "তাফসির পাওয়া যায়নি। আবার চেষ্টা করুন।"))
             }
         }
     }

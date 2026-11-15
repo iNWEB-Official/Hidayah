@@ -19,28 +19,44 @@ class CloudQuranRepository : QuranRepository {
     override suspend fun getChapter(number: Int): QuranChapter = withContext(Dispatchers.IO) {
         require(number in 1..114)
         val root = request("https://api.alquran.cloud/v1/surah/$number/editions/quran-uthmani,bn.bengali,ar.alafasy")
+        parseChapter(number, root)
+    }
+
+    internal fun parseChapter(number: Int, root: JSONObject): QuranChapter {
+        require(number in 1..114)
         val editions = root.getJSONArray("data")
         val byEdition = (0 until editions.length()).associate { index ->
             val edition = editions.getJSONObject(index)
             edition.getJSONObject("edition").getString("identifier") to edition
         }
+        check(byEdition.size == editions.length()) { "Duplicate editions" }
         val arabic = requireNotNull(byEdition["quran-uthmani"])
         val bangla = requireNotNull(byEdition["bn.bengali"])
         val audio = requireNotNull(byEdition["ar.alafasy"])
         val surah = parseSurah(arabic)
-        check(surah.number == number)
+        check(surah.number == number && surah.verses > 0) { "Surah mismatch" }
         fun ayahs(edition: JSONObject): Map<Int, JSONObject> {
+            check(edition.getInt("number") == number && edition.getInt("numberOfAyahs") == surah.verses) { "Edition chapter mismatch" }
             val array = edition.getJSONArray("ayahs")
-            return (0 until array.length()).map { array.getJSONObject(it) }.associateBy { it.getInt("numberInSurah") }
+            check(array.length() == surah.verses) { "Incomplete chapter" }
+            val items = (0 until array.length()).map { array.getJSONObject(it) }.associateBy { it.getInt("numberInSurah") }
+            check(items.keys == (1..surah.verses).toSet()) { "Invalid verse numbering" }
+            return items
         }
         val ar = ayahs(arabic); val bn = ayahs(bangla); val recordings = ayahs(audio)
-        check(ar.size == surah.verses && bn.size == surah.verses && recordings.size == surah.verses) { "Incomplete chapter" }
         val verses = (1..surah.verses).map { index ->
-            val uri = requireNotNull(recordings[index]).getString("audio")
+            val arabicVerse = requireNotNull(ar[index])
+            val banglaVerse = requireNotNull(bn[index])
+            val recording = requireNotNull(recordings[index])
+            check(arabicVerse.getInt("number") == banglaVerse.getInt("number") && arabicVerse.getInt("number") == recording.getInt("number")) { "Verse edition mismatch" }
+            val arabicText = arabicVerse.getString("text")
+            val banglaText = banglaVerse.getString("text")
+            check(arabicText.isNotBlank() && banglaText.isNotBlank()) { "Empty verse text" }
+            val uri = recording.getString("audio")
             check(uri.startsWith("https://")) { "Untrusted audio URL" }
-            QuranVerse(index, requireNotNull(ar[index]).getString("text"), requireNotNull(bn[index]).getString("text"), uri)
+            QuranVerse(index, arabicText, banglaText, uri)
         }
-        QuranChapter(surah, verses)
+        return QuranChapter(surah, verses)
     }
 
     override suspend fun getVerseText(reference: VerseReference): VerseText = withContext(Dispatchers.IO) {

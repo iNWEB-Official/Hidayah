@@ -97,6 +97,19 @@ class QuranReaderViewModelTest {
         assertTrue(vm.state.value.tafsirs[1]!!.expanded)
     }
 
+    @Test fun mismatchedChapterIsNotDisplayedAndCanBeRetried() = runTest(dispatcher) {
+        val repo = FakeRepository()
+        repo.chapters[1] = CompletableDeferred(chapter(2))
+        val vm = QuranReaderViewModel(repo)
+        vm.load(1); advanceUntilIdle()
+        assertNull(vm.state.value.chapter)
+        assertNotNull(vm.state.value.error)
+        repo.chapters[1] = CompletableDeferred(chapter(1))
+        vm.load(1, retry = true); advanceUntilIdle()
+        assertEquals(1, vm.state.value.chapter?.surah?.number)
+        assertNull(vm.state.value.error)
+    }
+
     @Test fun failedChapterCanBeRetried() = runTest(dispatcher) {
         val repo = FakeRepository()
         repo.chapters[1] = CompletableDeferred<QuranChapter>().also { it.completeExceptionally(IllegalStateException("offline")) }

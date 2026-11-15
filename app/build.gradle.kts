@@ -16,8 +16,10 @@ plugins {
 val hidayahResourceCommit = "fb122bd7670e77b0f10fdb2c2c6b6052975d0b0e"
 val hidayahResourceArchiveSha256 = "77f6f9d37080159f2251228542262a74ccd26a0dc8c9e6b3e8084be8d48fcfc6"
 val hidayahResourceDirectory = layout.buildDirectory.dir("generated/hidayahResources")
+val hidayahLicenseDirectory = layout.buildDirectory.dir("generated/hidayahLicenseAssets")
 val prepareHidayahResources by tasks.registering {
     outputs.dir(hidayahResourceDirectory)
+    outputs.dir(hidayahLicenseDirectory)
     doLast {
         val url = URL("https://codeload.github.com/iNWEB-Official/iNWEB-Official-Public-Resources/zip/$hidayahResourceCommit")
         val connection = url.openConnection().apply {
@@ -29,10 +31,13 @@ val prepareHidayahResources by tasks.registering {
             .joinToString("") { "%02x".format(it.toInt() and 0xff) }
         check(digest == hidayahResourceArchiveSha256) { "Hidayah resource archive checksum mismatch" }
         val outputDir = hidayahResourceDirectory.get().asFile
-        project.delete(outputDir)
+        val licenseDir = hidayahLicenseDirectory.get().asFile
+        project.delete(outputDir, licenseDir)
         check(outputDir.mkdirs() || outputDir.isDirectory) { "Cannot create resource output directory" }
-        val prefix = "iNWEB-Official-Public-Resources-$hidayahResourceCommit/Hidayah/app/src/main/res/"
+        val archiveRoot = "iNWEB-Official-Public-Resources-$hidayahResourceCommit/Hidayah/"
+        val prefix = "${archiveRoot}app/src/main/res/"
         var extracted = 0
+        var licenseExtracted = false
         ZipInputStream(ByteArrayInputStream(archive)).use { zip ->
             while (true) {
                 val entry = zip.nextEntry ?: break
@@ -45,16 +50,23 @@ val prepareHidayahResources by tasks.registering {
                     check(target.parentFile.mkdirs() || target.parentFile.isDirectory)
                     target.outputStream().use { zip.copyTo(it) }
                     extracted++
+                } else if (!entry.isDirectory && entry.name == "${archiveRoot}NOTO-FONT-LICENSE.txt") {
+                    val license = licenseDir.resolve("licenses/NOTO-FONT-LICENSE.txt")
+                    check(license.parentFile.mkdirs() || license.parentFile.isDirectory)
+                    license.outputStream().use { zip.copyTo(it) }
+                    licenseExtracted = true
                 }
                 zip.closeEntry()
             }
         }
         check(extracted == 43) { "Unexpected Hidayah resource count: $extracted" }
+        check(licenseExtracted) { "Noto font license missing" }
     }
 }
 
 android {
     sourceSets.getByName("main").res.srcDir(hidayahResourceDirectory)
+    sourceSets.getByName("main").assets.srcDir(hidayahLicenseDirectory)
     namespace = "com.hidayah.app"
     compileSdk = 35
     buildToolsVersion = "35.0.0"

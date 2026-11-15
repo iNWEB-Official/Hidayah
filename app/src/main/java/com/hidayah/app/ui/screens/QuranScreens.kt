@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,28 +71,29 @@ fun QuranScreen(viewModel: QuranViewModel, onOpenSurah: (Int) -> Unit) {
 fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(number) { viewModel.load(number) }
+    val chapter = state.chapter
+    val player = if (chapter != null) rememberRecitationPlayer(chapter) else null
     Column(Modifier.fillMaxSize().background(Canvas)) {
         Row(Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surahs", tint = Forest) }
-            Column {
-                Text(state.chapter?.surah?.name ?: "সূরা ${banglaDigits(number.toString())}", color = Ink, fontSize = 21.sp, fontFamily = BanglaFont)
-                Text(state.chapter?.surah?.meaning ?: "কুরআন পাঠ", color = Muted, fontSize = 12.sp)
+            Column(Modifier.weight(1f)) {
+                Text(chapter?.surah?.name ?: "সূরা ${banglaDigits(number.toString())}", color = Ink, fontSize = 21.sp, fontFamily = BanglaFont)
+                Text(chapter?.surah?.meaning ?: "কুরআন পাঠ", color = Muted, fontSize = 12.sp)
+            }
+            if (player != null) IconButton(onClick = player::playWholeSurah) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = "সম্পূর্ণ সূরা আরবিতে শুনুন", tint = Forest)
             }
         }
         when {
             state.loading -> Text("আয়াত লোড হচ্ছে…", Modifier.padding(24.dp), color = Muted)
             state.error != null -> ErrorRetry(state.error!!, { viewModel.load(number, retry = true) }, Modifier.padding(24.dp))
-            state.chapter != null -> {
-                val chapter = state.chapter!!
-                ReaderContent(chapter, state.tafsirs, viewModel::toggleTafsir)
-            }
+            chapter != null && player != null -> ReaderContent(chapter, player, state.tafsirs, viewModel::toggleTafsir)
         }
     }
 }
 
 @Composable
-private fun ReaderContent(chapter: QuranChapter, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit) {
-    val player = rememberRecitationPlayer(chapter)
+private fun ReaderContent(chapter: QuranChapter, player: RecitationState, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit) {
     RecitationControls(player)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
@@ -99,19 +101,20 @@ private fun ReaderContent(chapter: QuranChapter, tafsirs: Map<Int, TafsirState>,
             Spacer(Modifier.height(8.dp))
         }
         items(chapter.verses, key = { it.number }) { verse ->
-            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), onTafsir = { onTafsir(verse.number) }, onPlay = { player.playFrom(verse.number - 1) })
+            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), onTafsir = { onTafsir(verse.number) }, onPlay = { player.playFrom(verse.number - 1) }, onPlaySingle = { player.playSingle(verse.number - 1) })
         }
         item { Spacer(Modifier.height(18.dp)) }
     }
 }
 
 @Composable
-private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirState, onTafsir: () -> Unit, onPlay: () -> Unit) {
+private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirState, onTafsir: () -> Unit, onPlay: () -> Unit, onPlaySingle: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(18.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("${chapter.surah.number}:${verse.number}", modifier = Modifier.weight(1f), color = Forest, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-            TextButton(onClick = onPlay) { Text("▶ আয়াত শুনুন") }
+            TextButton(onClick = onPlay) { Text("▶ এখান থেকে শুনুন") }
         }
+        TextButton(onClick = onPlaySingle) { Text("▶ শুধু এই আয়াত (আরবি)") }
         Spacer(Modifier.height(10.dp))
         Text(verse.arabic, modifier = Modifier.fillMaxWidth(), color = Ink, fontFamily = ArabicFont, fontSize = 26.sp, lineHeight = 46.sp, textAlign = TextAlign.Right)
         Spacer(Modifier.height(14.dp))

@@ -22,28 +22,39 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.hidayah.app.data.QuranChapter
+import com.hidayah.app.ui.recitationQueue
 import com.hidayah.app.ui.theme.*
 
 @Stable
-class RecitationState(private val player: ExoPlayer) {
+class RecitationState(private val player: ExoPlayer, private val chapter: QuranChapter) {
     var playing by mutableStateOf(false)
         private set
     var index by mutableIntStateOf(0)
         private set
     var error by mutableStateOf<String?>(null)
         private set
+    private var queueStart = 0
 
     val listener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) { playing = isPlaying }
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) { index = player.currentMediaItemIndex.coerceAtLeast(0) }
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            if (mediaItem != null) index = queueStart + player.currentMediaItemIndex.coerceAtLeast(0)
+        }
         override fun onPlayerError(error: PlaybackException) { this@RecitationState.error = "অডিও পাওয়া যায়নি। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন।" }
     }
-    fun playFrom(index: Int) {
+    private fun playQueue(start: Int, single: Boolean) {
+        val queue = recitationQueue(chapter.verses.size, start, single) ?: return
         error = null
-        player.seekTo(index, 0L)
-        if (player.playbackState == Player.STATE_IDLE) player.prepare()
+        queueStart = queue.start
+        index = queue.start
+        val items = chapter.verses.subList(queue.start, queue.endExclusive).map { MediaItem.fromUri(it.audioUrl) }
+        player.setMediaItems(items)
+        player.prepare()
         player.play()
     }
+    fun playFrom(index: Int) = playQueue(index, single = false)
+    fun playSingle(index: Int) = playQueue(index, single = true)
+    fun playWholeSurah() = playFrom(0)
     fun toggle() {
         if (player.isPlaying) player.pause() else {
             error = null
@@ -59,19 +70,22 @@ class RecitationState(private val player: ExoPlayer) {
 fun rememberRecitationPlayer(chapter: QuranChapter): RecitationState {
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
-    val player = remember(chapter.surah.number) {
+    val player = remember(chapter) {
         ExoPlayer.Builder(context.applicationContext).build().apply {
             setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_SPEECH).build(), true)
             setHandleAudioBecomingNoisy(true)
         }
     }
-    val state = remember(player) { RecitationState(player) }
-    DisposableEffect(player, owner, chapter) {
+    val state = remember(player, chapter) { RecitationState(player, chapter) }
+    DisposableEffect(player, state) {
         player.setMediaItems(chapter.verses.map { MediaItem.fromUri(it.audioUrl) })
         player.addListener(state.listener)
+        onDispose { player.removeListener(state.listener); player.release() }
+    }
+    DisposableEffect(player, owner, state) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_PAUSE) state.pause() }
         owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer); player.removeListener(state.listener); player.release() }
+        onDispose { owner.lifecycle.removeObserver(observer) }
     }
     return state
 }
@@ -87,6 +101,7 @@ fun RecitationControls(player: RecitationState) {
             if (player.playing) OutlinedButton(onClick = player::toggle) { Text("বিরতি") }
             else Button(onClick = player::toggle) { Text("শুনুন") }
         }
+        androidx.compose.material3.TextButton(onClick = player::playWholeSurah) { Text("▶ পুরো সূরা আরবিতে শুনুন") }
         player.error?.let { Text(it, color = androidx.compose.ui.graphics.Color(0xFF9D3E30), fontSize = 12.sp) }
     }
 }

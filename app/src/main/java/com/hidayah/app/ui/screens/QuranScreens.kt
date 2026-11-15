@@ -72,7 +72,7 @@ fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(number) { viewModel.load(number) }
     val chapter = state.chapter
-    val player = if (chapter != null) rememberRecitationPlayer(chapter) else null
+    val player = if (chapter != null && chapter.verses.isNotEmpty() && chapter.verses.all { it.audioUrl != null }) rememberRecitationPlayer(chapter) else null
     Column(Modifier.fillMaxSize().background(Canvas)) {
         Row(Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surahs", tint = Forest) }
@@ -87,34 +87,35 @@ fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -
         when {
             state.loading -> Text("আয়াত লোড হচ্ছে…", Modifier.padding(24.dp), color = Muted)
             state.error != null -> ErrorRetry(state.error!!, { viewModel.load(number, retry = true) }, Modifier.padding(24.dp))
-            chapter != null && player != null -> ReaderContent(chapter, player, state.tafsirs, viewModel::toggleTafsir)
+            chapter != null -> ReaderContent(chapter, player, state.tafsirs, viewModel::toggleTafsir)
         }
     }
 }
 
 @Composable
-private fun ReaderContent(chapter: QuranChapter, player: RecitationState, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit) {
-    RecitationControls(player)
+private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit) {
+    if (player != null) RecitationControls(player)
+    else Text("অডিও এখন পাওয়া যাচ্ছে না; আরবি ও বাংলা পাঠ পড়তে পারবেন। পরে সূরাটি আবার খুলে চেষ্টা করুন।", Modifier.padding(horizontal = 20.dp, vertical = 8.dp), color = Muted, fontSize = 13.sp)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Text("Arabic: Uthmani · বাংলা অনুবাদ: মুহিউদ্দীন খান (Al Quran Cloud)\nবাংলা তাফসির: আহসানুল বায়ান (Quran.com) · Reciter: Mishary Alafasy", color = Muted, fontSize = 11.sp, lineHeight = 17.sp)
             Spacer(Modifier.height(8.dp))
         }
         items(chapter.verses, key = { it.number }) { verse ->
-            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), onTafsir = { onTafsir(verse.number) }, onPlay = { player.playFrom(verse.number - 1) }, onPlaySingle = { player.playSingle(verse.number - 1) })
+            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), audioAvailable = player != null, onTafsir = { onTafsir(verse.number) }, onPlay = { player?.playFrom(verse.number - 1) }, onPlaySingle = { player?.playSingle(verse.number - 1) })
         }
         item { Spacer(Modifier.height(18.dp)) }
     }
 }
 
 @Composable
-private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirState, onTafsir: () -> Unit, onPlay: () -> Unit, onPlaySingle: () -> Unit) {
+private fun VerseCard(chapter: QuranChapter, verse: QuranVerse, tafsir: TafsirState, audioAvailable: Boolean, onTafsir: () -> Unit, onPlay: () -> Unit, onPlaySingle: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(18.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("${chapter.surah.number}:${verse.number}", modifier = Modifier.weight(1f), color = Forest, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-            TextButton(onClick = onPlay) { Text("▶ এখান থেকে শুনুন") }
+            TextButton(onClick = onPlay, enabled = audioAvailable) { Text("▶ এখান থেকে শুনুন") }
         }
-        TextButton(onClick = onPlaySingle) { Text("▶ শুধু এই আয়াত (আরবি)") }
+        TextButton(onClick = onPlaySingle, enabled = audioAvailable) { Text("▶ শুধু এই আয়াত (আরবি)") }
         Spacer(Modifier.height(10.dp))
         Text(verse.arabic, modifier = Modifier.fillMaxWidth(), color = Ink, fontFamily = ArabicFont, fontSize = 26.sp, lineHeight = 46.sp, textAlign = TextAlign.Right)
         Spacer(Modifier.height(14.dp))

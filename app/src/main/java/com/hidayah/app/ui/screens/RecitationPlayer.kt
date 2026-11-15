@@ -47,7 +47,7 @@ class RecitationState(private val player: ExoPlayer, private val chapter: QuranC
         error = null
         queueStart = queue.start
         index = queue.start
-        val items = chapter.verses.subList(queue.start, queue.endExclusive).map { MediaItem.fromUri(it.audioUrl) }
+        val items = chapter.verses.subList(queue.start, queue.endExclusive).map { MediaItem.fromUri(requireNotNull(it.audioUrl)) }
         player.setMediaItems(items)
         player.prepare()
         player.play()
@@ -78,7 +78,7 @@ fun rememberRecitationPlayer(chapter: QuranChapter): RecitationState {
     }
     val state = remember(player, chapter) { RecitationState(player, chapter) }
     DisposableEffect(player, state) {
-        player.setMediaItems(chapter.verses.map { MediaItem.fromUri(it.audioUrl) })
+        player.setMediaItems(chapter.verses.map { MediaItem.fromUri(requireNotNull(it.audioUrl)) })
         player.addListener(state.listener)
         onDispose { player.removeListener(state.listener); player.release() }
     }

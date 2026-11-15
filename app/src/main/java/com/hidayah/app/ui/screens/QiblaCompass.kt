@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.hidayah.app.data.CompassDisplay
+import com.hidayah.app.data.compassDisplay
 import com.hidayah.app.data.GeoPoint
 import com.hidayah.app.data.normalizeCompassDegrees
 import com.hidayah.app.data.relativeCompassDegrees
@@ -95,14 +97,18 @@ fun QiblaCompass(point: GeoPoint, bearing: Double) {
     val reading = rememberCompassReading(point)
     val heading = reading.heading
     val angle = heading?.let { relativeCompassDegrees(bearing, it.toDouble())?.toFloat() }
+    val display = compassDisplay(reading.available, heading?.toDouble(), bearing, reading.accuracy)
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(22.dp)).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("প্রকৃত উত্তর থেকে ${banglaDigits((bearing.roundToInt() % 360).toString())}°", color = Forest, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-        if (!reading.available) {
+        if (display == CompassDisplay.UNAVAILABLE) {
             Spacer(Modifier.height(12.dp))
             Text("কম্পাস সেন্সর পাওয়া যায়নি বা চালু করা যায়নি। বিশ্বস্ত কম্পাসে উপরের দিক ব্যবহার করুন।", color = Muted, fontSize = 13.sp, lineHeight = 19.sp, textAlign = TextAlign.Center)
-        } else if (angle == null) {
+        } else if (display == CompassDisplay.WAITING) {
             Spacer(Modifier.height(12.dp))
             Text("কম্পাস সেন্সরের জন্য অপেক্ষা করা হচ্ছে…", color = Muted, fontSize = 13.sp)
+        } else if (display == CompassDisplay.UNRELIABLE) {
+            Spacer(Modifier.height(12.dp))
+            Text("কম্পাস নির্ভরযোগ্য পাঠ দিচ্ছে না, তাই তীর দেখানো হচ্ছে না। ফোন ক্যালিব্রেট করুন এবং বিশ্বস্ত উৎসে দিক যাচাই করুন।", color = androidx.compose.ui.graphics.Color(0xFF9D3E30), fontSize = 12.sp, lineHeight = 18.sp, textAlign = TextAlign.Center)
         } else {
             Spacer(Modifier.height(12.dp))
             Text("ফোনের উপরের অংশ তীরের দিকে রাখুন", color = Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
@@ -114,7 +120,7 @@ fun QiblaCompass(point: GeoPoint, bearing: Double) {
                 drawCircle(color = ringColor, radius = radius, style = Stroke(width = 2.dp.toPx()))
                 drawCircle(color = ringColor, radius = radius * .78f, style = Stroke(width = 1.dp.toPx()))
                 drawLine(markerColor, Offset(center.x, center.y - radius), Offset(center.x, center.y - radius + 12.dp.toPx()), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
-                rotate(angle) {
+                rotate(angle!!) {
                     drawLine(needleColor, Offset(center.x, center.y + radius * .38f), Offset(center.x, center.y - radius * .45f), strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
                     val arrow = Path().apply {
                         moveTo(center.x, center.y - radius * .66f)

@@ -159,6 +159,7 @@ private fun renderCard(context: Context, value: DailyValue, background: Bitmap):
 }
 
 suspend fun createHadithSharePreview(context: Context, value: DailyValue): HadithSharePreview = withContext(Dispatchers.IO) {
+    require(fitsShareImageTextLimit(value)) { "লেখাটি ছবির জন্য খুব দীর্ঘ। সম্পূর্ণ লেখা টেক্সট হিসেবে শেয়ার করুন।" }
     val selection = selectHadithBackground(value)
     val requestedRemote = !value.shareBackgroundUrl.isNullOrBlank()
     val remote = if (requestedRemote) runCatching { fetchBackground(value.shareBackgroundUrl) }.getOrNull() else null

@@ -5,6 +5,8 @@ import com.hidayah.app.ui.QuranReaderViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -25,6 +27,7 @@ class QuranReaderViewModelTest {
     private class FakeRepository : QuranRepository {
         val chapters = mutableMapOf<Int, CompletableDeferred<QuranChapter>>()
         val tafsirs = mutableMapOf<Pair<Int, Int>, CompletableDeferred<Tafsir>>()
+        var ignoreChapterCancellation = false
         var chapterCalls = 0
         var tafsirCalls = 0
         var tafsirCancelled = 0
@@ -33,7 +36,9 @@ class QuranReaderViewModelTest {
         override suspend fun getVerseText(reference: VerseReference): VerseText = error("unused")
         override suspend fun getChapter(number: Int): QuranChapter {
             chapterCalls++
-            return try { chapters.getValue(number).await() } catch (e: CancellationException) { chapterCancelled++; throw e }
+            val deferred = chapters.getValue(number)
+            return try { if (ignoreChapterCancellation) withContext(NonCancellable) { deferred.await() } else deferred.await() }
+            catch (e: CancellationException) { chapterCancelled++; throw e }
         }
         override suspend fun getTafsir(surah: Int, verse: Int): Tafsir {
             tafsirCalls++
@@ -56,6 +61,36 @@ class QuranReaderViewModelTest {
         old.complete(chapter(1)); advanceUntilIdle()
         assertEquals(2, vm.state.value.chapter?.surah?.number)
         assertNull(vm.state.value.error)
+    }
+
+    @Test fun nonCooperativeOldResultCannotReplaceNewChapter() = runTest(dispatcher) {
+        val repo = FakeRepository().apply { ignoreChapterCancellation = true }
+        val old = CompletableDeferred<QuranChapter>()
+        val current = CompletableDeferred<QuranChapter>()
+        repo.chapters[1] = old; repo.chapters[2] = current
+        val vm = QuranReaderViewModel(repo)
+        vm.load(1); runCurrent(); vm.load(2); runCurrent()
+        current.complete(chapter(2)); runCurrent()
+        old.complete(chapter(1)); advanceUntilIdle()
+        assertEquals(2, vm.state.value.chapter?.surah?.number)
+        assertNull(vm.state.value.error)
+    }
+
+    @Test fun sameSurahRetryRejectsNonCooperativeOldResult() = runTest(dispatcher) {
+        val repo = FakeRepository().apply { ignoreChapterCancellation = true }
+        val old = CompletableDeferred<QuranChapter>()
+        val current = CompletableDeferred<QuranChapter>()
+        repo.chapters[1] = old
+        val vm = QuranReaderViewModel(repo)
+        vm.load(1); runCurrent()
+        repo.chapters[1] = current
+        vm.load(1, retry = true); runCurrent()
+        old.complete(chapter(1)); runCurrent()
+        assertTrue(vm.state.value.loading)
+        assertNull(vm.state.value.chapter)
+        current.complete(chapter(1)); advanceUntilIdle()
+        assertFalse(vm.state.value.loading)
+        assertEquals(1, vm.state.value.chapter?.surah?.number)
     }
 
     @Test fun oldFailureDoesNotHideNewChapter() = runTest(dispatcher) {

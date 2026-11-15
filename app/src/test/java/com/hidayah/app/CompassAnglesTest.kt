@@ -1,5 +1,7 @@
 package com.hidayah.app
 
+import com.hidayah.app.data.CompassDisplay
+import com.hidayah.app.data.compassDisplay
 import com.hidayah.app.data.normalizeCompassDegrees
 import com.hidayah.app.data.relativeCompassDegrees
 import org.junit.Assert.*
@@ -12,6 +14,15 @@ class CompassAnglesTest {
         assertEquals(20.0, relativeCompassDegrees(10.0, 350.0)!!, 0.0001)
         assertEquals(340.0, relativeCompassDegrees(350.0, 10.0)!!, 0.0001)
         assertEquals(0.0, relativeCompassDegrees(360.0, 0.0)!!, 0.0001)
+    }
+    @Test fun unavailableUnreliableOrInvalidReadingsDoNotProduceReadyState() {
+        assertEquals(CompassDisplay.UNAVAILABLE, compassDisplay(false, 20.0, 90.0, 3))
+        assertEquals(CompassDisplay.WAITING, compassDisplay(true, null, 90.0, 3))
+        assertEquals(CompassDisplay.WAITING, compassDisplay(true, Double.NaN, 90.0, 3))
+        assertEquals(CompassDisplay.WAITING, compassDisplay(true, 20.0, Double.NaN, 3))
+        assertEquals(CompassDisplay.UNRELIABLE, compassDisplay(true, 20.0, 90.0, 0))
+        assertEquals(CompassDisplay.UNRELIABLE, compassDisplay(true, 20.0, 90.0, -1))
+        assertEquals(CompassDisplay.READY, compassDisplay(true, 20.0, 90.0, 1))
     }
     @Test fun rejectsInvalidReadingsRatherThanShowingAnArrow() {
         assertNull(normalizeCompassDegrees(Double.NaN))

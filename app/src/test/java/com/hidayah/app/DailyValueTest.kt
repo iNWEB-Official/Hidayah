@@ -1,6 +1,8 @@
 package com.hidayah.app
 
 import com.hidayah.app.data.formatDailyValueShare
+import com.hidayah.app.data.dailyShareTextFitsIntent
+import com.hidayah.app.data.MAX_DAILY_SHARE_TEXT_CHARS
 import com.hidayah.app.data.dailyValueImageBlocks
 import com.hidayah.app.data.fitsShareImageTextLimit
 import com.hidayah.app.data.ShareImageTextStyle
@@ -95,6 +97,15 @@ class DailyValueTest {
         assertFalse(fitsShareImageTextLimit(value))
         assertTrue(formatDailyValueShare(value).contains(value.reflection))
         assertTrue(formatDailyValueShare(value).contains("সূত্র: সূত্র"))
+    }
+    @Test fun longTextIntentIsRejectedWithoutTruncatingFormattedContent() {
+        assertTrue(dailyShareTextFitsIntent("x".repeat(MAX_DAILY_SHARE_TEXT_CHARS)))
+        assertFalse(dailyShareTextFitsIntent("x".repeat(MAX_DAILY_SHARE_TEXT_CHARS + 1)))
+        val value = parseDailyValue(base + ("reflection" to "দ".repeat(MAX_DAILY_SHARE_TEXT_CHARS)))!!
+        val text = formatDailyValueShare(value)
+        assertFalse(dailyShareTextFitsIntent(text))
+        assertTrue(text.contains(value.reflection))
+        assertTrue(text.endsWith("সূত্র: সূত্র"))
     }
     @Test fun optionalBackgroundFieldsAreTrimmedWithoutChangingContent() {
         val value = parseDailyValue(base + mapOf("shareBackgroundId" to "  CHARITY_B ", "shareBackgroundUrl" to " https://example.com/bg.jpg "))!!

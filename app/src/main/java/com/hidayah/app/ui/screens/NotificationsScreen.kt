@@ -59,7 +59,7 @@ fun NotificationsScreen(settings: SettingsStore, onBack: () -> Unit, onSettings:
                 if (options.reminders && channel == ReminderChannelState.NOT_CREATED) Text("প্রথম স্মরণবার্তার আগে চ্যানেল তৈরি নাও হতে পারে।", color = Muted, fontSize = 12.sp)
                 if (options.reminders && channel == ReminderChannelState.UNKNOWN) Text("স্মরণবার্তার চ্যানেলের অবস্থা যাচাই করা যায়নি।", color = Muted, fontSize = 12.sp)
                 Spacer(Modifier.height(6.dp))
-                Text("প্রথম লক্ষ্য রাত ৮টা; পরে প্রায় ২৪ ঘণ্টা পরপর। ডিভাইস, অনুমতি ও সময় অঞ্চল বদলালে সময় পরিবর্তিত হতে পারে; পৌঁছানো নিশ্চিত নয়।", color = Muted, fontSize = 13.sp, lineHeight = 21.sp)
+                Text("নতুন সময়সূচির প্রথম লক্ষ্য তখনকার স্থানীয় রাত ৮টা; পরে প্রায় ২৪ ঘণ্টা পরপর। সময় অঞ্চল বা দিনের আলো সংরক্ষণ সময় বদলালে রাত ৮টার জন্য স্বয়ংক্রিয়ভাবে নতুন সময়সূচি হয় না। ডিভাইস ও অনুমতির কারণে সময় বদলাতে পারে; পৌঁছানো নিশ্চিত নয়।", color = Muted, fontSize = 13.sp, lineHeight = 21.sp)
                 TextButton(onClick = onSettings) { Text("স্মরণবার্তা পরিচালনা করুন") }
             }
             Spacer(Modifier.height(12.dp))

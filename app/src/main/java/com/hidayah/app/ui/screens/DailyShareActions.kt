@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidayah.app.data.DailyValue
 import com.hidayah.app.data.formatDailyValueShare
+import com.hidayah.app.data.dailyShareTextFitsIntent
 import com.hidayah.app.ui.HadithSharePreview
 import com.hidayah.app.ui.createHadithSharePreview
 import com.hidayah.app.ui.shareHadithImage
@@ -57,10 +58,13 @@ internal fun DailyShareActions(value: DailyValue) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         TextButton(onClick = {
             error = null; message = null
-            runCatching {
-                val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, formatDailyValueShare(value))
+            val text = formatDailyValueShare(value)
+            if (!dailyShareTextFitsIntent(text)) {
+                error = "লেখাটি শেয়ার করার জন্য খুব বড়। সম্পূর্ণ লেখাটি উৎসে দেখুন; অংশ বাদ দিয়ে শেয়ার করা হয়নি।"
+            } else runCatching {
+                val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
                 context.startActivity(Intent.createChooser(send, "টেক্সট শেয়ার করুন"))
-            }.onFailure { error = "টেক্সট শেয়ার করা যায়নি।" }
+            }.onFailure { error = "টেক্সট শেয়ার খোলা যায়নি। আবার চেষ্টা করুন।" }
         }) { Text("টেক্সট শেয়ার", fontSize = 13.sp) }
         TextButton(enabled = !busy, onClick = {
             error = null; message = null

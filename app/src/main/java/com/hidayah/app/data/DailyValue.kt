@@ -38,6 +38,10 @@ fun formatDailyValueShare(value: DailyValue): String = listOfNotNull(
     "সূত্র: ${value.reference}",
 ).joinToString("\n\n")
 
+/** Avoid attempting a very large Android intent; do not silently truncate religious content. */
+const val MAX_DAILY_SHARE_TEXT_CHARS = 50_000
+fun dailyShareTextFitsIntent(text: String): Boolean = text.length <= MAX_DAILY_SHARE_TEXT_CHARS
+
 /** The image contains the same published fields as text sharing, without generating a quotation. */
 enum class ShareImageTextStyle { LABEL, TITLE, REFLECTION, ARABIC, TRANSLATION, CITATION }
 data class ShareImageTextBlock(val text: String, val style: ShareImageTextStyle)

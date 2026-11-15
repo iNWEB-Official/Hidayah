@@ -64,6 +64,16 @@ val prepareHidayahResources by tasks.registering {
     }
 }
 
+// Hosted builds reserve these values centrally; local fallback is for development only.
+val requestedVersionName = providers.gradleProperty("hidayahVersionName").orNull
+val requestedVersionCode = providers.gradleProperty("hidayahVersionCode").orNull
+require((requestedVersionName == null) == (requestedVersionCode == null)) { "Both version properties are required" }
+val effectiveVersionName = requestedVersionName ?: "2026.0.1"
+val effectiveVersionCode = requestedVersionCode?.toIntOrNull() ?: if (requestedVersionCode == null) 20260001 else error("Invalid versionCode")
+val versionParts = effectiveVersionName.split(".").map { it.toIntOrNull() ?: error("Invalid versionName") }
+require(versionParts.size == 3 && versionParts[0] in 2000..2099 && versionParts[1] in 0..99 && versionParts[2] in 0..99 &&
+    effectiveVersionCode == versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]) { "Version name/code mismatch" }
+
 android {
     sourceSets.getByName("main").res.srcDir(hidayahResourceDirectory)
     sourceSets.getByName("main").assets.srcDir(hidayahLicenseDirectory)
@@ -75,9 +85,9 @@ android {
         applicationId = "com.hidayah.app"
         minSdk = 26
         targetSdk = 35
-        // year * 10000 + minor * 100 + patch; increment for every distributed build.
-        versionCode = 20260001
-        versionName = "2026.0.1"
+        // Year, major and patch are allocated by the hosted workflow.
+        versionCode = effectiveVersionCode
+        versionName = effectiveVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {

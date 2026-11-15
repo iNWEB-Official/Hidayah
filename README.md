@@ -15,6 +15,10 @@ Hidayah is an Islamic Android app bringing Quran, prayer times and everyday wors
 
 The tracker stores progress in a local database. If reading fails, it offers a retry rather than presenting progress as empty. Persistence and day changes still need device testing; uninstalling or clearing app data can remove local records.
 
+দোয়ার পছন্দ ও অ্যাপের কিছু সেটিংস ডিভাইসে রাখা হয়; পড়া বা সংরক্ষণে সমস্যা হলে সতর্কবার্তা দেখানোর ব্যবস্থা আছে। বাস্তব ফোনে সংরক্ষণ ও পুনরায় খোলা পরীক্ষা বাকি।
+
+Dua favorites and some app settings are stored locally, with warnings for detected read or write failures. Device persistence and recovery testing is pending.
+
 নামাজের সময় অবস্থান, ফোনের সময় অঞ্চল ও নির্বাচিত হিসাব পদ্ধতির ওপর নির্ভর করে। অবস্থান বা অনুমতি না পাওয়া গেলে সময় দেখানো হয় না; স্থানীয় নির্ভরযোগ্য সময়সূচির সঙ্গে মিলিয়ে নিন। পদ্ধতি ও আসরের পছন্দ ডিভাইসে সংরক্ষণের ব্যবস্থা আছে; ফোনে পরীক্ষা বাকি।
 
 Prayer times depend on location, the device time zone and the chosen calculation method. If location or permission is unavailable, times are not shown; check a trusted local timetable. Method and Asr choices are stored on the device; persistence and calculations need device testing.

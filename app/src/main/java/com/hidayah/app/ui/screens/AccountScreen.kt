@@ -55,14 +55,14 @@ fun AccountScreen(viewModel: AccountViewModel, onBack: () -> Unit) {
                 Text(profile.email, color = Forest, style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 Text(when (profile.role) {
-                    AccountRole.ADMIN -> "অ্যাডমিন পরিচয় যাচাই হয়েছে"
+                    AccountRole.ADMIN -> "যাচাইকৃত ইমেইলে অ্যাডমিন দাবি পাওয়া গেছে"
                     AccountRole.USER -> "ব্যবহারকারী অ্যাকাউন্ট"
                     AccountRole.UNVERIFIED -> "ইমেইল বা পরিচয় যাচাই বাকি"
                 }, color = Muted)
                 if (!profile.emailVerified) TextButton(enabled = !state.busy, onClick = viewModel::verify) { Text("ইমেইল যাচাইয়ের লিংক পাঠান") }
                 TextButton(enabled = !state.busy, onClick = viewModel::refresh) { Text("পরিচয় আবার যাচাই করুন") }
                 TextButton(enabled = !state.busy, onClick = viewModel::signOut) { Text("লগআউট") }
-                Text("অ্যাডমিন আপলোড ও ক্লাউড সিঙ্ক পরবর্তী ধাপে তৈরি হবে।", color = Muted)
+                Text("অ্যাডমিনের কার্যকর অনুমতি সার্ভারে যাচাই প্রয়োজন। অ্যাডমিন আপলোড ও ক্লাউড সিঙ্ক এখনও চালু নয়।", color = Muted)
             }
             if (state.busy) { Spacer(Modifier.height(8.dp)); Text("অনুগ্রহ করে অপেক্ষা করুন…", color = Muted) }
             state.message?.let { Spacer(Modifier.height(8.dp)); Text(it, color = Muted) }

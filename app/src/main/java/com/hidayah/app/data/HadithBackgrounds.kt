@@ -1,6 +1,7 @@
 package com.hidayah.app.data
 
 import java.net.URI
+import java.text.Normalizer
 import java.util.Locale
 
 data class BackgroundGroup(val label: String, val ids: List<String>, val keywords: List<String>)
@@ -25,8 +26,8 @@ data class BackgroundSelection(val id: String, val selectedByAdmin: Boolean)
 fun selectHadithBackground(value: DailyValue): BackgroundSelection {
     val requested = value.shareBackgroundId?.trim()?.lowercase(Locale.ROOT)
     if (requested != null && requested in HadithBackgroundIds) return BackgroundSelection(requested, true)
-    val text = listOf(value.title, value.reflection, value.referenceText).joinToString(" ").lowercase(Locale.ROOT)
-    val group = HadithBackgroundGroups.firstOrNull { g -> g.keywords.any { text.contains(it) } } ?: HadithBackgroundGroups.last()
+    val text = Normalizer.normalize(listOf(value.title, value.reflection, value.referenceText).joinToString(" "), Normalizer.Form.NFC).lowercase(Locale.ROOT)
+    val group = HadithBackgroundGroups.firstOrNull { g -> g.keywords.any { text.contains(Normalizer.normalize(it, Normalizer.Form.NFC)) } } ?: HadithBackgroundGroups.last()
     val index = (value.title + value.reference).hashCode().and(Int.MAX_VALUE) % group.ids.size
     return BackgroundSelection(group.ids[index], false)
 }
@@ -37,8 +38,12 @@ fun safeShareBackgroundUrl(raw: String?): String? {
     return try {
         val uri = URI(value)
         val host = uri.host?.lowercase(Locale.ROOT) ?: return null
+        val validLabels = host.length <= 253 && host.split('.').all { label ->
+            label.length in 1..63 && label.first().isLetterOrDigit() && label.last().isLetterOrDigit() &&
+                label.all { it in 'a'..'z' || it in '0'..'9' || it == '-' }
+        }
         if (uri.scheme?.lowercase(Locale.ROOT) != "https" || uri.userInfo != null || uri.port !in listOf(-1, 443) ||
             host == "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal") ||
-            !host.contains('.') || host.all { it.isDigit() || it == '.' } || ':' in host || '\\' in value || uri.fragment != null) null else value
+            !validLabels || !host.contains('.') || host.all { it.isDigit() || it == '.' } || ':' in host || '\\' in value || uri.fragment != null) null else value
     } catch (_: Exception) { null }
 }

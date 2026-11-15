@@ -24,6 +24,10 @@ class HadithBackgroundsTest {
         assertFalse(selection.selectedByAdmin)
         assertEquals(selection, selectHadithBackground(value))
     }
+    @Test fun unicodeEquivalentKeywordStillUsesMatchingGroup() {
+        val decomposed = java.text.Normalizer.normalize("ধৈর্য", java.text.Normalizer.Form.NFD)
+        assertTrue(selectHadithBackground(base.copy(title = decomposed)).id in listOf("patience_a", "patience_b"))
+    }
     @Test fun unknownIdAndUnmatchedTextUseGeneralBackground() {
         val selection = selectHadithBackground(base.copy(shareBackgroundId = "no_such_image"))
         assertTrue(selection.id in listOf("general_a", "general_b"))
@@ -36,6 +40,9 @@ class HadithBackgroundsTest {
         assertNull(safeShareBackgroundUrl("https://user:pass@example.com/a.jpg"))
         assertNull(safeShareBackgroundUrl("https://127.0.0.1/a.jpg"))
         assertNull(safeShareBackgroundUrl("https://localhost/a.jpg"))
+        assertNull(safeShareBackgroundUrl("https://localhost./a.jpg"))
+        assertNull(safeShareBackgroundUrl("https://metadata.google.internal./a.jpg"))
+        assertNull(safeShareBackgroundUrl("https://example..com/a.jpg"))
         assertNull(safeShareBackgroundUrl("https://example.com:8443/a.jpg"))
         assertNull(safeShareBackgroundUrl("https://example.com/a.jpg#fragment"))
         assertNull(safeShareBackgroundUrl(null))

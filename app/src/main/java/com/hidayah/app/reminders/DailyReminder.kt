@@ -18,7 +18,8 @@ import java.util.concurrent.TimeUnit
 
 class DailyReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
-        val enabled = applicationContext.getSharedPreferences("hidayah_settings", Context.MODE_PRIVATE).getBoolean("reminders", false)
+        val enabled = try { applicationContext.getSharedPreferences("hidayah_settings", Context.MODE_PRIVATE).getBoolean("reminders", false) }
+            catch (_: Exception) { false }
         val permission = Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         if (!mayPostReminder(enabled, NotificationManagerCompat.from(applicationContext).areNotificationsEnabled(), permission)) return Result.success()
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

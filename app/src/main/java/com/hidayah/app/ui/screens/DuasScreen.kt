@@ -33,7 +33,8 @@ fun DuasScreen(initialQuery: String = "", onBack: () -> Unit) {
     val owner = LocalLifecycleOwner.current
     val favorites = remember(context.applicationContext) { DuaFavorites(context) }
     val speech = remember(context.applicationContext, owner) { DuaSpeech(context) }
-    val favoriteIds by favorites.ids.collectAsStateWithLifecycle()
+    val favoriteState by favorites.state.collectAsStateWithLifecycle()
+    val favoriteIds = favoriteState.ids
     val speechState by speech.state.collectAsStateWithLifecycle()
     var category by rememberSaveable { mutableStateOf("সব") }
     var query by rememberSaveable { mutableStateOf(initialQuery) }
@@ -61,17 +62,24 @@ fun DuasScreen(initialQuery: String = "", onBack: () -> Unit) {
                 }
             }
             item {
+                if (favoriteState.readFailed) {
+                    Text(favoriteState.error ?: "পছন্দের তালিকা পড়া যায়নি।", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                    TextButton(onClick = favorites::retryRead) { Text("পছন্দের তালিকা আবার পড়ুন") }
+                }
                 Text("যন্ত্রে শোনার কণ্ঠটি কৃত্রিম; উচ্চারণে ভুল হতে পারে। নির্ভরযোগ্য পাঠের সঙ্গে মিলিয়ে নিন।", color = Muted, fontSize = 12.sp, lineHeight = 19.sp)
                 if (speechState.playingId != null) TextButton(onClick = speech::stop) { Text("পাঠ বন্ধ করুন") }
                 speechState.message?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, lineHeight = 19.sp) }
             }
             if (results.isEmpty()) item {
-                Text(if (category == "পছন্দ" && query.isBlank()) "এখনো কোনো দোয়া পছন্দের তালিকায় নেই।" else "কোনো দোয়া পাওয়া যায়নি। অন্য শব্দ বা বিভাগ দিয়ে চেষ্টা করুন।", color = Muted, fontSize = 14.sp)
+                Text(if (category == "পছন্দ" && favoriteState.readFailed) "পছন্দের তালিকা এখন দেখানো যাচ্ছে না।" else if (category == "পছন্দ" && query.isBlank()) "এখনো কোনো দোয়া পছন্দের তালিকায় নেই।" else "কোনো দোয়া পাওয়া যায়নি। অন্য শব্দ বা বিভাগ দিয়ে চেষ্টা করুন।", color = Muted, fontSize = 14.sp)
             }
             items(results, key = { it.id }) { dua ->
-                DuaCard(dua = dua, isFavorite = dua.id in favoriteIds, playing = speechState.playingId == dua.id,
+                DuaCard(dua = dua, isFavorite = dua.id in favoriteIds, favoriteEnabled = !favoriteState.readFailed, playing = speechState.playingId == dua.id,
                     actionError = actionError?.takeIf { it.first == dua.id }?.second,
-                    onFavorite = { favorites.setFavorite(dua.id, it) },
+                    onFavorite = {
+                        actionError = null
+                        if (!favorites.setFavorite(dua.id, it)) actionError = dua.id to "পছন্দের পরিবর্তন সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।"
+                    },
                     onSpeak = { if (speechState.playingId == dua.id) speech.stop() else speech.play(dua) },
                     onShare = {
                         actionError = null
@@ -92,7 +100,7 @@ fun DuasScreen(initialQuery: String = "", onBack: () -> Unit) {
 }
 
 @Composable
-private fun DuaCard(dua: DuaItem, isFavorite: Boolean, playing: Boolean, actionError: String?, onFavorite: (Boolean) -> Unit, onSpeak: () -> Unit, onShare: () -> Unit, onSource: () -> Unit) {
+private fun DuaCard(dua: DuaItem, isFavorite: Boolean, favoriteEnabled: Boolean, playing: Boolean, actionError: String?, onFavorite: (Boolean) -> Unit, onSpeak: () -> Unit, onShare: () -> Unit, onSource: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(CardSurface, RoundedCornerShape(18.dp)).padding(18.dp)) {
         Text(dua.category, color = Muted, fontSize = 12.sp)
         Spacer(Modifier.height(4.dp))
@@ -111,7 +119,7 @@ private fun DuaCard(dua: DuaItem, isFavorite: Boolean, playing: Boolean, actionE
             OutlinedButton(onClick = onShare, modifier = Modifier.weight(1f)) { Text("শেয়ার", fontSize = 12.sp) }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { onFavorite(!isFavorite) }) { Text(if (isFavorite) "♥ পছন্দে আছে" else "♡ পছন্দে রাখুন", fontSize = 12.sp) }
+            TextButton(enabled = favoriteEnabled, onClick = { onFavorite(!isFavorite) }) { Text(if (isFavorite) "♥ পছন্দে আছে" else "♡ পছন্দে রাখুন", fontSize = 12.sp) }
             TextButton(onClick = onSource) { Text("মূল সূত্র", fontSize = 12.sp) }
         }
     }

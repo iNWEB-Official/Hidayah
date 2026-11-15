@@ -29,7 +29,7 @@ fun SettingsScreen(store: SettingsStore, onBack: () -> Unit) {
     var note by remember { mutableStateOf<String?>(null) }
     fun enableReminder() {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) { note = "সিস্টেম সেটিংস থেকে নোটিফিকেশন অনুমতি চালু করুন।"; return }
-        runCatching { DailyReminder.schedule(context); store.setReminders(true) }
+        runCatching { DailyReminder.schedule(context); check(store.setReminders(true)) }
             .onFailure { note = "স্মরণবার্তা চালু করা যায়নি।" }
     }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -39,6 +39,7 @@ fun SettingsScreen(store: SettingsStore, onBack: () -> Unit) {
         FeatureHeader("সেটিংস", onBack)
         Page {
             Spacer(Modifier.height(20.dp))
+            settings.warning?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, lineHeight = 19.sp); Spacer(Modifier.height(8.dp)) }
             SettingCard("থিম নির্বাচন", if (settings.dark) "ডার্ক মোড" else "লাইট মোড") {
                 Switch(checked = settings.dark, onCheckedChange = store::setDark)
             }
@@ -57,8 +58,9 @@ fun SettingsScreen(store: SettingsStore, onBack: () -> Unit) {
                 Switch(checked = settings.reminders, onCheckedChange = { enabled ->
                     note = null
                     if (!enabled) {
-                        store.setReminders(false)
-                        runCatching { DailyReminder.cancel(context) }.onFailure { note = "বন্ধের অনুরোধ সম্পূর্ণ করা যায়নি। আবার চেষ্টা করুন।" }
+                        val saved = store.setReminders(false)
+                        val cancelled = runCatching { DailyReminder.cancel(context) }.isSuccess
+                        if (!saved || !cancelled) note = "বন্ধের অনুরোধ সম্পূর্ণ করা যায়নি। আবার চেষ্টা করুন।"
                     }
                     else if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
                     else enableReminder()

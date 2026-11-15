@@ -8,9 +8,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.concurrent.atomic.AtomicLong
 
 enum class AccountRole { USER, ADMIN, UNVERIFIED }
 data class AccountProfile(val uid: String, val email: String, val emailVerified: Boolean, val role: AccountRole)
+
+/** Never retain a previous role while the current token is being checked. */
+fun pendingAccountProfile(uid: String, email: String, emailVerified: Boolean): AccountProfile =
+    AccountProfile(uid, email, emailVerified, AccountRole.UNVERIFIED)
+fun isCurrentAccountRequest(request: Long, latest: Long, uid: String, currentUid: String?): Boolean =
+    request == latest && uid == currentUid
 
 /** Display only; privileged operations must independently enforce trusted server-side rules. */
 fun accountRole(verified: Boolean, claims: Map<String, Any>?): AccountRole = when {
@@ -33,17 +40,20 @@ class FirebaseAccountRepository : AccountRepository {
     private val auth: FirebaseAuth get() = FirebaseAuth.getInstance()
     override fun observe(): Flow<AccountProfile?> = callbackFlow {
         var pending: Job? = null
+        val generation = AtomicLong()
         val listener = FirebaseAuth.IdTokenListener { firebase ->
+            val request = generation.incrementAndGet()
             pending?.cancel()
             val user = firebase.currentUser
             if (user == null) {
                 trySend(null)
             } else {
+                trySend(pendingAccountProfile(user.uid, user.email.orEmpty(), user.isEmailVerified))
                 pending = launch {
                     val claims = try { user.getIdToken(false).await().claims }
                     catch (e: CancellationException) { throw e }
                     catch (_: Exception) { null }
-                    if (firebase.currentUser?.uid == user.uid) {
+                    if (isCurrentAccountRequest(request, generation.get(), user.uid, firebase.currentUser?.uid)) {
                         trySend(AccountProfile(user.uid, user.email.orEmpty(), user.isEmailVerified, accountRole(user.isEmailVerified, claims)))
                     }
                 }

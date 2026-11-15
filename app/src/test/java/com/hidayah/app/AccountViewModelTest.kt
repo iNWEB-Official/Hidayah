@@ -53,6 +53,15 @@ class AccountViewModelTest {
         assertEquals(AccountRole.UNVERIFIED, accountRole(false, mapOf("admin" to true, "email_verified" to true)))
         assertEquals(AccountRole.UNVERIFIED, accountRole(true, null))
     }
+    @Test fun pendingProfileAndStaleTokenRequestsFailClosed() {
+        val pending = pendingAccountProfile("u1", "user@example.com", true)
+        assertEquals(AccountRole.UNVERIFIED, pending.role)
+        assertFalse(isCurrentAccountRequest(1, 2, "u1", "u1"))
+        assertFalse(isCurrentAccountRequest(2, 2, "u1", "u2"))
+        assertFalse(isCurrentAccountRequest(2, 2, "u1", null))
+        assertTrue(isCurrentAccountRequest(2, 2, "u1", "u1"))
+        assertEquals(AccountRole.UNVERIFIED, accountRole(true, null))
+    }
     @Test fun signInAndSignOutObserveProfileWithoutChangingCoreAccess() = runTest(dispatcher) {
         val repo = FakeAccountRepository(); val vm = AccountViewModel(repo)
         runCurrent()

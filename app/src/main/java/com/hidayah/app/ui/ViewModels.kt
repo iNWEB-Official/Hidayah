@@ -27,38 +27,53 @@ data class PrayerUiState(
     val ramadanError: String? = null,
 )
 
-class PrayerViewModel(private val calculator: PrayerCalculator, private val locationSource: DeviceLocationSource) : ViewModel() {
+class PrayerViewModel(
+    private val calculator: PrayerCalculator,
+    private val locationSource: LocationSource,
+    private val calculationDispatcher: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.Default,
+    private val currentZone: () -> ZoneId = { ZoneId.systemDefault() },
+    private val currentDate: (ZoneId) -> LocalDate = { LocalDate.now(it) },
+) : ViewModel() {
     private val mutableState = MutableStateFlow(PrayerUiState())
     val state: StateFlow<PrayerUiState> = mutableState.asStateFlow()
     private var calculationJob: kotlinx.coroutines.Job? = null
+    private var locationJob: kotlinx.coroutines.Job? = null
 
     fun refreshLocation() {
         if (mutableState.value.loading) return
-        viewModelScope.launch {
-            mutableState.update { it.copy(loading = true, error = null) }
-            locationSource.currentLocation().fold(
-                onSuccess = { point ->
-                    mutableState.update { it.copy(point = point, loading = false) }
-                    recalculate(force = true)
-                },
-                onFailure = { error ->
-                    calculationJob?.cancel()
-                    mutableState.update { it.copy(point = null, qiblaBearing = null, prayers = emptyList(), ramadan = null, ramadanLoading = false, loading = false, error = error.message) }
-                },
-            )
+        calculationJob?.cancel()
+        mutableState.update { it.copy(point = null, qiblaBearing = null, prayers = emptyList(), ramadan = null, ramadanLoading = false, ramadanError = null, loading = true, error = null) }
+        locationJob = viewModelScope.launch {
+            try {
+                val result = locationSource.currentLocation()
+                result.fold(
+                    onSuccess = { point ->
+                        mutableState.update { it.copy(point = point, loading = false) }
+                        recalculate(force = true)
+                    },
+                    onFailure = { error ->
+                        if (error is kotlinx.coroutines.CancellationException) throw error
+                        mutableState.update { it.copy(loading = false, error = error.message ?: "অবস্থান পাওয়া যায়নি। আবার চেষ্টা করুন।") }
+                    },
+                )
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (_: Exception) {
+                mutableState.update { it.copy(loading = false, error = "অবস্থান পাওয়া যায়নি। আবার চেষ্টা করুন।") }
+            }
         }
     }
     fun permissionDenied() {
+        locationJob?.cancel()
         calculationJob?.cancel()
-        mutableState.update { it.copy(point = null, qiblaBearing = null, prayers = emptyList(), ramadan = null, ramadanLoading = false, error = "Location permission denied. You can allow it in system settings.") }
+        mutableState.update { it.copy(point = null, qiblaBearing = null, prayers = emptyList(), ramadan = null, ramadanLoading = false, ramadanError = null, loading = false, error = "অবস্থানের অনুমতি দেওয়া হয়নি। ফোনের সেটিংস থেকে অনুমতি দিতে পারেন।") }
     }
     fun setMethod(method: PrayerMethod) { mutableState.update { it.copy(settings = it.settings.copy(method = method)) }; recalculate(force = true) }
     fun setAsr(asr: AsrMethod) { mutableState.update { it.copy(settings = it.settings.copy(asr = asr)) }; recalculate(force = true) }
 
     fun recalculate(force: Boolean = false) {
         val old = mutableState.value
-        val zone = ZoneId.systemDefault()
-        val date = LocalDate.now(zone)
+        val zone = currentZone()
+        val date = currentDate(zone)
         val point = old.point
         if (!force && date == old.date && zone == old.zone) return
         calculationJob?.cancel()
@@ -69,17 +84,17 @@ class PrayerViewModel(private val calculator: PrayerCalculator, private val loca
         mutableState.update { it.copy(date = date, zone = zone, prayers = emptyList(), qiblaBearing = null, ramadan = null, ramadanLoading = true, ramadanError = null) }
         calculationJob = viewModelScope.launch {
             try {
-                val result = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                val result = kotlinx.coroutines.withContext(calculationDispatcher) {
                     calculatePrayerData(calculator, point, date, zone, old.settings)
                 }
                 mutableState.update { it.copy(prayers = result.prayers ?: emptyList(), qiblaBearing = result.qiblaBearing,
                     ramadan = result.ramadan, ramadanLoading = false,
-                    error = if (result.prayers == null) "Times are unavailable for this location and date. Check a trusted local timetable." else null,
-                    ramadanError = if (result.ramadan == null) "Ramadan timetable unavailable." else null) }
+                    error = if (result.prayers == null) "এই অবস্থান ও তারিখের নামাজের সময় পাওয়া যায়নি। স্থানীয় নির্ভরযোগ্য সময়সূচি দেখুন।" else null,
+                    ramadanError = if (result.ramadan == null) "রমজানের সময়সূচি পাওয়া যায়নি।" else null) }
             } catch (e: kotlinx.coroutines.CancellationException) { throw e }
             catch (_: Exception) {
                 mutableState.update { it.copy(prayers = emptyList(), qiblaBearing = null, ramadan = null, ramadanLoading = false,
-                    error = "Could not calculate times for this location. Try again.", ramadanError = "Ramadan timetable unavailable.") }
+                    error = "এই অবস্থানের সময় হিসাব করা যায়নি। আবার চেষ্টা করুন।", ramadanError = "রমজানের সময়সূচি পাওয়া যায়নি।") }
             }
         }
     }

@@ -64,6 +64,7 @@ class AdhanPrayerCalculator : PrayerCalculator {
     }
 
     override fun qiblaBearing(point: GeoPoint): Double? {
+        require(point.latitude in -90.0..90.0 && point.longitude in -180.0..180.0)
         // A direction is undefined at the Kaaba and its antipode.
         val toRadians = PI / 180.0
         val lat = point.latitude * toRadians

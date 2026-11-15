@@ -57,6 +57,20 @@ class RepositoriesTest {
         assertNull(AdhanPrayerCalculator().qiblaBearing(GeoPoint(21.4225241, 39.8261818)))
     }
 
+    @Test fun invalidCoordinatesAreRejectedForTimesAndQibla() {
+        val calculator = AdhanPrayerCalculator()
+        for (point in listOf(GeoPoint(91.0, 0.0), GeoPoint(0.0, -181.0), GeoPoint(Double.NaN, 0.0))) {
+            try {
+                calculator.calculate(point, LocalDate.of(2025, 3, 15), ZoneId.of("UTC"), PrayerSettings())
+                fail("Invalid coordinates must not be used for prayer times")
+            } catch (_: IllegalArgumentException) { }
+            try {
+                calculator.qiblaBearing(point)
+                fail("Invalid coordinates must not be used for qibla")
+            } catch (_: IllegalArgumentException) { }
+        }
+    }
+
     @Test fun ramadanDaysUseFajrAndMaghribAndCoverCurrentMonth() {
         val timetable = RamadanSchedule(AdhanPrayerCalculator()).forCurrentOrNextRamadan(
             LocalDate.of(2025, 3, 15), GeoPoint(23.8103, 90.4125), ZoneId.of("Asia/Dhaka"), PrayerSettings(),

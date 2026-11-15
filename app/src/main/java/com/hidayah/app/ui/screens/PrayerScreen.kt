@@ -47,7 +47,13 @@ fun PrayerScreen(viewModel: PrayerViewModel) {
     }
     LaunchedEffect(lifecycleOwner, viewModel) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            while (true) { viewModel.recalculate(); delay(60_000L) }
+            while (true) {
+                val fine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                val coarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                if (!fine && !coarse && (viewModel.state.value.point != null || viewModel.state.value.loading)) viewModel.permissionDenied()
+                else viewModel.recalculate()
+                delay(60_000L)
+            }
         }
     }
     Page {
@@ -76,7 +82,7 @@ fun PrayerScreen(viewModel: PrayerViewModel) {
         }
         Spacer(Modifier.height(26.dp))
         SectionLabel("হিসাবের সেটিংস")
-        Text("আপনার স্থানীয় মসজিদ বা কর্তৃপক্ষের পদ্ধতি নির্বাচন করুন।", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+        Text("আপনার স্থানীয় মসজিদ বা কর্তৃপক্ষের পদ্ধতি নির্বাচন করুন। অ্যাপ বন্ধ হলে সেটিংস আবার নির্বাচন করতে হতে পারে।", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
         Spacer(Modifier.height(10.dp))
         SettingMenu("পদ্ধতি", state.settings.method.label, PrayerMethod.entries.toList(), { it.label }, viewModel::setMethod)
         Spacer(Modifier.height(8.dp))

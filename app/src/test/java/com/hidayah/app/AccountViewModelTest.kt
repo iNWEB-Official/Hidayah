@@ -23,7 +23,12 @@ class AccountViewModelTest {
         val profile = MutableStateFlow<AccountProfile?>(null)
         var lastEmail: String? = null
         var fail = false
-        override fun observe(): Flow<AccountProfile?> = profile
+        var failObserve = false
+        var failReset = false
+        override fun observe(): Flow<AccountProfile?> {
+            if (failObserve) error("observe failed")
+            return profile
+        }
         override suspend fun signIn(email: String, password: String) {
             if (fail) error("invalid credentials")
             lastEmail = email
@@ -33,7 +38,7 @@ class AccountViewModelTest {
             if (fail) error("unavailable")
             profile.value = AccountProfile("id", email, false, AccountRole.UNVERIFIED)
         }
-        override suspend fun resetPassword(email: String) { lastEmail = email }
+        override suspend fun resetPassword(email: String) { if (failReset) error("reset failed"); lastEmail = email }
         override suspend fun verifyEmail() = Unit
         override suspend fun refresh() = Unit
         override fun signOut() { profile.value = null }
@@ -72,6 +77,29 @@ class AccountViewModelTest {
         assertNotNull(vm.state.value.message)
         assertFalse(vm.state.value.message!!.contains("secret"))
         assertNull(vm.state.value.profile)
+    }
+    @Test fun observerFailureCanBeRetriedWithoutMisrepresentingGuestState() = runTest(dispatcher) {
+        val repo = FakeAccountRepository().apply { failObserve = true }
+        val vm = AccountViewModel(repo)
+        runCurrent()
+        assertFalse(vm.state.value.loading)
+        assertTrue(vm.state.value.observeFailed)
+        repo.failObserve = false
+        repo.profile.value = AccountProfile("id", "user@example.com", true, AccountRole.USER)
+        vm.retryObservation(); runCurrent()
+        assertFalse(vm.state.value.observeFailed)
+        assertEquals("user@example.com", vm.state.value.profile?.email)
+        assertNull(vm.state.value.message)
+    }
+    @Test fun resetSuccessAndFailureUseTheSameNeutralMessage() = runTest(dispatcher) {
+        val repo = FakeAccountRepository()
+        val vm = AccountViewModel(repo)
+        runCurrent(); vm.reset("user@example.com"); runCurrent()
+        val successMessage = vm.state.value.message
+        repo.failReset = true
+        vm.reset("user@example.com"); runCurrent()
+        assertEquals(successMessage, vm.state.value.message)
+        assertFalse(vm.state.value.busy)
     }
     @Test fun resetRequestTrimsEmail() = runTest(dispatcher) {
         val repo = FakeAccountRepository(); val vm = AccountViewModel(repo)

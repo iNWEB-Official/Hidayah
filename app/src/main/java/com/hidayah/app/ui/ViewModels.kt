@@ -18,6 +18,7 @@ data class PrayerUiState(
     val point: GeoPoint? = null,
     val qiblaBearing: Double? = null,
     val settings: PrayerSettings = PrayerSettings(),
+    val settingsError: String? = null,
     val date: LocalDate = LocalDate.now(),
     val zone: ZoneId = ZoneId.systemDefault(),
     val loading: Boolean = false,
@@ -33,8 +34,11 @@ class PrayerViewModel(
     private val calculationDispatcher: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.Default,
     private val currentZone: () -> ZoneId = { ZoneId.systemDefault() },
     private val currentDate: (ZoneId) -> LocalDate = { LocalDate.now(it) },
+    private val settingsStorage: PrayerSettingsStorage? = null,
 ) : ViewModel() {
-    private val mutableState = MutableStateFlow(PrayerUiState())
+    private val initialSettings = try { (settingsStorage?.load() ?: PrayerSettings()) to null }
+        catch (_: Exception) { PrayerSettings() to "সংরক্ষিত হিসাবের সেটিংস পড়া যায়নি। পদ্ধতি যাচাই করুন।" }
+    private val mutableState = MutableStateFlow(PrayerUiState(settings = initialSettings.first, settingsError = initialSettings.second))
     val state: StateFlow<PrayerUiState> = mutableState.asStateFlow()
     private var calculationJob: kotlinx.coroutines.Job? = null
     private var locationJob: kotlinx.coroutines.Job? = null
@@ -67,8 +71,14 @@ class PrayerViewModel(
         calculationJob?.cancel()
         mutableState.update { it.copy(point = null, qiblaBearing = null, prayers = emptyList(), ramadan = null, ramadanLoading = false, ramadanError = null, loading = false, error = "অবস্থানের অনুমতি দেওয়া হয়নি। ফোনের সেটিংস থেকে অনুমতি দিতে পারেন।") }
     }
-    fun setMethod(method: PrayerMethod) { mutableState.update { it.copy(settings = it.settings.copy(method = method)) }; recalculate(force = true) }
-    fun setAsr(asr: AsrMethod) { mutableState.update { it.copy(settings = it.settings.copy(asr = asr)) }; recalculate(force = true) }
+    private fun updateSettings(settings: PrayerSettings) {
+        val error = try { settingsStorage?.save(settings); null }
+            catch (_: Exception) { "সেটিংস সংরক্ষণ করা যায়নি; আবার নির্বাচন করুন।" }
+        mutableState.update { it.copy(settings = settings, settingsError = error) }
+        recalculate(force = true)
+    }
+    fun setMethod(method: PrayerMethod) = updateSettings(mutableState.value.settings.copy(method = method))
+    fun setAsr(asr: AsrMethod) = updateSettings(mutableState.value.settings.copy(asr = asr))
 
     fun recalculate(force: Boolean = false) {
         val old = mutableState.value
@@ -108,7 +118,7 @@ class HidayahViewModelFactory(private val context: Context) : ViewModelProvider.
         QuranViewModel::class.java -> QuranViewModel(AppContainer.quranRepository)
         QuranReaderViewModel::class.java -> QuranReaderViewModel(AppContainer.quranRepository)
         ValuesViewModel::class.java -> ValuesViewModel(AppContainer.quranRepository)
-        PrayerViewModel::class.java -> PrayerViewModel(AppContainer.prayerCalculator, DeviceLocationSource(context))
+        PrayerViewModel::class.java -> PrayerViewModel(AppContainer.prayerCalculator, DeviceLocationSource(context), settingsStorage = LocalPrayerSettingsStorage(context))
         TrackerViewModel::class.java -> TrackerViewModel(AppContainer.trackerRepository(context))
         else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
     } as T

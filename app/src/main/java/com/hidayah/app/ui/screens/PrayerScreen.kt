@@ -82,7 +82,8 @@ fun PrayerScreen(viewModel: PrayerViewModel) {
         }
         Spacer(Modifier.height(26.dp))
         SectionLabel("হিসাবের সেটিংস")
-        Text("আপনার স্থানীয় মসজিদ বা কর্তৃপক্ষের পদ্ধতি নির্বাচন করুন। অ্যাপ বন্ধ হলে সেটিংস আবার নির্বাচন করতে হতে পারে।", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+        Text("আপনার স্থানীয় মসজিদ বা কর্তৃপক্ষের পদ্ধতি নির্বাচন করুন। পছন্দ এই ডিভাইসে সংরক্ষিত হয়।", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+        state.settingsError?.let { Text(it, color = MaterialError, fontSize = 12.sp, lineHeight = 18.sp) }
         Spacer(Modifier.height(10.dp))
         SettingMenu("পদ্ধতি", state.settings.method.label, PrayerMethod.entries.toList(), { it.label }, viewModel::setMethod)
         Spacer(Modifier.height(8.dp))

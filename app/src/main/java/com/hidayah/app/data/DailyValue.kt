@@ -38,6 +38,20 @@ fun formatDailyValueShare(value: DailyValue): String = listOfNotNull(
     "সূত্র: ${value.reference}",
 ).joinToString("\n\n")
 
+/** The image contains the same published fields as text sharing, without generating a quotation. */
+enum class ShareImageTextStyle { LABEL, TITLE, REFLECTION, ARABIC, TRANSLATION, CITATION }
+data class ShareImageTextBlock(val text: String, val style: ShareImageTextStyle)
+fun dailyValueImageBlocks(value: DailyValue): List<ShareImageTextBlock> = buildList {
+    add(ShareImageTextBlock(if (value.referenceType == "Hadith") "দৈনিক হাদিস" else "দৈনিক আয়াত", ShareImageTextStyle.LABEL))
+    add(ShareImageTextBlock(value.title, ShareImageTextStyle.TITLE))
+    add(ShareImageTextBlock(value.reflection, ShareImageTextStyle.REFLECTION))
+    value.referenceArabic?.takeIf { it.isNotBlank() && it != value.referenceText }?.let { add(ShareImageTextBlock(it, ShareImageTextStyle.ARABIC)) }
+    add(ShareImageTextBlock(value.referenceText, ShareImageTextStyle.TRANSLATION))
+    add(ShareImageTextBlock("সূত্র: ${value.reference}", ShareImageTextStyle.CITATION))
+}
+fun fitsShareImageTextLimit(value: DailyValue, limit: Long = 4000L): Boolean =
+    dailyValueImageBlocks(value).sumOf { it.text.length.toLong() } <= limit
+
 sealed interface DailyValueStatus {
     data object Loading : DailyValueStatus
     data class Available(val value: DailyValue, val fromCache: Boolean, val isFallback: Boolean = false) : DailyValueStatus

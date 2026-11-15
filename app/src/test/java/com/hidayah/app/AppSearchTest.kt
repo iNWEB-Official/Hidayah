@@ -21,6 +21,19 @@ class AppSearchTest {
         assertTrue(searchApp("২৩৫৭").any { it.id == "dua-iftar" })
         assertTrue(searchApp("2357").any { it.id == "dua-iftar" })
     }
+    @Test fun unicodeEquivalentFormsAndWhitespaceMatch() {
+        val result = AppSearchIndex.first { java.text.Normalizer.normalize(it.title, java.text.Normalizer.Form.NFD) != it.title }
+        val decomposed = java.text.Normalizer.normalize(result.title, java.text.Normalizer.Form.NFD)
+        assertTrue(searchApp(decomposed).any { it.id == result.id })
+        assertTrue(searchApp("  আল-কুরআন  ").any { it.id == "quran" })
+        assertTrue(searchApp("দোয়া   ও   জিকির").any { it.id == "duas" })
+    }
+    @Test fun onlyKnownSearchTargetsAreAccepted() {
+        assertTrue(AppSearchIndex.all(::isSupportedSearchTarget))
+        assertFalse(isSupportedSearchTarget(AppSearchResult("bad", "Bad", "Bad", "external")))
+        assertFalse(isSupportedSearchTarget(AppSearchResult("bad", "Bad", "Bad", "value", "../account")))
+        assertFalse(isSupportedSearchTarget(AppSearchResult("bad", "Bad", "Bad", "dua", "not-a-dua")))
+    }
     @Test fun searchResultsIdentifyCorrectTargets() {
         assertEquals("values/family", searchApp("পারিবারিক মূল্যবোধ").single().let { "values/${it.queryText}" })
         assertEquals("দোয়া ও জিকির", searchApp("দোয়া ও জিকির").first { it.destination == "duas" }.title)

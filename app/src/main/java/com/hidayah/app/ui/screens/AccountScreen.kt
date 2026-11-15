@@ -27,6 +27,9 @@ fun AccountScreen(viewModel: AccountViewModel, onBack: () -> Unit) {
         FeatureHeader("লগইন ও প্রোফাইল", onBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
             if (state.loading) Text("অ্যাকাউন্ট তথ্য দেখা হচ্ছে…", color = Muted)
+            else if (state.observeFailed) {
+                TextButton(onClick = viewModel::retryObservation) { Text("অ্যাকাউন্ট তথ্য আবার দেখুন") }
+            }
             else if (state.profile == null) {
                 Text(if (registering) "নতুন অ্যাকাউন্ট" else "ইমেইল দিয়ে লগইন", color = Forest, style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(12.dp))

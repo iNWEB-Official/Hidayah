@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hidayah.app.data.SettingsStore
+import com.hidayah.app.data.isSupportedSearchTarget
 import com.hidayah.app.ui.screens.ValuesScreen
 import com.hidayah.app.ui.screens.ValueDetailScreen
 import com.hidayah.app.ui.screens.DuasScreen
@@ -135,12 +136,13 @@ fun HidayahApp(settings: SettingsStore) {
             composable("notifications") { NotificationsScreen(settings, onBack = { navController.popBackStack() }, onSettings = { navigate("settings") }) }
             composable("search") {
                 AppSearchScreen(onBack = { navController.popBackStack() }, onSelect = { result ->
-                    when (result.destination) {
+                    if (isSupportedSearchTarget(result)) when (result.destination) {
                         "value" -> navigate("values/${result.queryText}")
                         "dua" -> navigate("duas?query=${Uri.encode(result.queryText)}")
                         "story" -> navigate("learning?query=${Uri.encode(result.queryText)}")
                         in listOf("home", "quran", "prayer", "tracker") -> navigateTab(result.destination)
-                        else -> navigate(result.destination)
+                        "values", "duas", "learning", "settings" -> navigate(result.destination)
+                        else -> Unit
                     }
                 })
             }

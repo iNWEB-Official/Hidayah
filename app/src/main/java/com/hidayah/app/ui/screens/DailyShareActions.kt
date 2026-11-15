@@ -24,9 +24,10 @@ import kotlinx.coroutines.launch
 internal fun DailyShareActions(value: DailyValue) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var busy by remember { mutableStateOf(false) }
-    var preview by remember { mutableStateOf<HadithSharePreview?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    // A new daily value must not reuse the previous value's preview or error state.
+    var busy by remember(value) { mutableStateOf(false) }
+    var preview by remember(value) { mutableStateOf<HadithSharePreview?>(null) }
+    var error by remember(value) { mutableStateOf<String?>(null) }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         TextButton(onClick = {
             error = null

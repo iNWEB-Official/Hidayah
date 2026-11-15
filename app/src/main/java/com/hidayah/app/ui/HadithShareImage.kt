@@ -19,6 +19,9 @@ import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import com.hidayah.app.R
 import com.hidayah.app.data.DailyValue
+import com.hidayah.app.data.ShareImageTextStyle
+import com.hidayah.app.data.dailyValueImageBlocks
+import com.hidayah.app.data.fitsShareImageTextLimit
 import com.hidayah.app.data.PublicImageDns
 import com.hidayah.app.data.safeShareBackgroundUrl
 import com.hidayah.app.data.selectHadithBackground
@@ -104,21 +107,23 @@ private fun layoutText(text: String, typeface: Typeface, size: Float, color: Int
 }
 
 private fun renderCard(context: Context, value: DailyValue, background: Bitmap): Bitmap {
-    require(value.title.length + value.referenceText.length + value.reference.length + (value.referenceArabic?.length ?: 0) <= 4000) {
+    require(fitsShareImageTextLimit(value)) {
         "লেখাটি ছবির জন্য খুব দীর্ঘ। সম্পূর্ণ লেখা টেক্সট হিসেবে শেয়ার করুন।"
     }
     val bn = ResourcesCompat.getFont(context, R.font.noto_bengali) ?: Typeface.DEFAULT
     val ar = ResourcesCompat.getFont(context, R.font.noto_arabic) ?: Typeface.DEFAULT
     val green = Color.rgb(8, 62, 37)
     val black = Color.rgb(29, 42, 33)
-    val blocks = mutableListOf<StaticLayout>()
-    blocks += layoutText(if (value.referenceType == "Hadith") "দৈনিক হাদিস" else "দৈনিক আয়াত", bn, 48f, green)
-    blocks += layoutText(value.title, bn, 52f, green)
-    value.referenceArabic?.takeIf { it.isNotBlank() && it != value.referenceText }?.let {
-        blocks += layoutText(it, ar, 56f, black, arabic = true)
+    val blocks = dailyValueImageBlocks(value).map { block ->
+        when (block.style) {
+            ShareImageTextStyle.LABEL -> layoutText(block.text, bn, 48f, green)
+            ShareImageTextStyle.TITLE -> layoutText(block.text, bn, 52f, green)
+            ShareImageTextStyle.REFLECTION -> layoutText(block.text, bn, 43f, black)
+            ShareImageTextStyle.ARABIC -> layoutText(block.text, ar, 56f, black, arabic = true)
+            ShareImageTextStyle.TRANSLATION -> layoutText(block.text, bn, 46f, black)
+            ShareImageTextStyle.CITATION -> layoutText(block.text, bn, 37f, green)
+        }
     }
-    blocks += layoutText(value.referenceText, bn, 46f, black)
-    blocks += layoutText("সূত্র: ${value.reference}", bn, 37f, green)
     val contentHeight = blocks.sumOf { it.height } + (blocks.size - 1) * 26
     val panelHeight = contentHeight + 128
     val outputHeight = maxOf(1350, panelHeight + 250)

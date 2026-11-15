@@ -1,6 +1,9 @@
 package com.hidayah.app
 
 import com.hidayah.app.data.formatDailyValueShare
+import com.hidayah.app.data.dailyValueImageBlocks
+import com.hidayah.app.data.fitsShareImageTextLimit
+import com.hidayah.app.data.ShareImageTextStyle
 import com.hidayah.app.data.parseDailyValue
 import org.junit.Assert.*
 import org.junit.Test
@@ -66,6 +69,22 @@ class DailyValueTest {
         assertNull(value.shareBackgroundUrl)
     }
 
+    @Test fun imageBlocksContainPublishedReflectionArabicTranslationAndCitation() {
+        val value = parseDailyValue(base + ("referenceArabic" to "نص عربي"))!!
+        val blocks = dailyValueImageBlocks(value)
+        assertEquals(listOf(ShareImageTextStyle.LABEL, ShareImageTextStyle.TITLE, ShareImageTextStyle.REFLECTION,
+            ShareImageTextStyle.ARABIC, ShareImageTextStyle.TRANSLATION, ShareImageTextStyle.CITATION), blocks.map { it.style })
+        assertEquals("ব্যাখ্যা", blocks.single { it.style == ShareImageTextStyle.REFLECTION }.text)
+        assertEquals("نص عربي", blocks.single { it.style == ShareImageTextStyle.ARABIC }.text)
+        assertEquals("বাংলা অর্থ", blocks.single { it.style == ShareImageTextStyle.TRANSLATION }.text)
+        assertEquals("সূত্র: সূত্র", blocks.last().text)
+    }
+    @Test fun imageLimitIncludesReflectionAndDoesNotTruncateTextFallback() {
+        val value = parseDailyValue(base + ("reflection" to "দ".repeat(4100)))!!
+        assertFalse(fitsShareImageTextLimit(value))
+        assertTrue(formatDailyValueShare(value).contains(value.reflection))
+        assertTrue(formatDailyValueShare(value).contains("সূত্র: সূত্র"))
+    }
     @Test fun optionalBackgroundFieldsAreTrimmedWithoutChangingContent() {
         val value = parseDailyValue(base + mapOf("shareBackgroundId" to "  CHARITY_B ", "shareBackgroundUrl" to " https://example.com/bg.jpg "))!!
         assertEquals("charity_b", value.shareBackgroundId)

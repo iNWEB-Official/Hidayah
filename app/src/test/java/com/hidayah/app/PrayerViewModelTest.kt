@@ -75,6 +75,29 @@ class PrayerViewModelTest {
         assertEquals(5, vm.state.value.prayers.size)
     }
 
+    @Test fun settingsAreRestoredAndSaveFailuresAreVisible() = runTest(dispatcher) {
+        var saved = PrayerSettings()
+        var fail = false
+        val store = object : PrayerSettingsStorage {
+            override fun load(): PrayerSettings = saved
+            override fun save(settings: PrayerSettings) { if (fail) error("failed"); saved = settings }
+        }
+        val source = LocationSource { Result.success(point) }
+        val first = PrayerViewModel(FakeCalculator(), source, dispatcher, { dhaka }, { date }, store)
+        first.setMethod(PrayerMethod.KARACHI)
+        first.setAsr(AsrMethod.HANAFI)
+        val next = PrayerViewModel(FakeCalculator(), source, dispatcher, { dhaka }, { date }, store)
+        assertEquals(PrayerSettings(PrayerMethod.KARACHI, AsrMethod.HANAFI), next.state.value.settings)
+        fail = true
+        next.setMethod(PrayerMethod.EGYPTIAN)
+        assertNotNull(next.state.value.settingsError)
+        assertEquals(PrayerMethod.KARACHI, saved.method)
+        fail = false
+        next.setMethod(PrayerMethod.EGYPTIAN)
+        assertNull(next.state.value.settingsError)
+        assertEquals(PrayerMethod.EGYPTIAN, saved.method)
+    }
+
     @Test fun permissionDenialCancelsInFlightLocationAndClearsState() = runTest(dispatcher) {
         val pending = CompletableDeferred<GeoPoint>()
         val vm = PrayerViewModel(FakeCalculator(), LocationSource { Result.success(pending.await()) }, dispatcher, { dhaka }, { date })

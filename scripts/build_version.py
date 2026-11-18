@@ -37,6 +37,15 @@ def next_version(state, year, major_release=False):
     return {"year": year, "major": major, "patch": patch}
 
 
+def effective_major_request(requested, run_id, previously_marked):
+    """An all-jobs retry reserves a new patch, not a second major for one event."""
+    if not isinstance(run_id, str) or not run_id.isdigit():
+        raise ValueError("Invalid run ID")
+    if not isinstance(previously_marked, list) or not all(isinstance(x, str) and x.isdigit() for x in previously_marked):
+        raise ValueError("Invalid major event history")
+    return bool(requested and run_id not in previously_marked)
+
+
 def version_fields(state):
     year, major, patch = state["year"], state["major"], state["patch"]
     code = year * 10000 + major * 100 + patch
@@ -61,11 +70,16 @@ def main():
     repo = os.environ["GITHUB_REPOSITORY"]
     url = f"{os.environ['GITHUB_API_URL']}/repos/{repo}/contents/{PATH}"
     current = request(url + "?ref=" + urllib.parse.quote(BRANCH), token)
-    state = json.loads(base64.b64decode(current["content"]).decode("utf-8"))
+    ledger = json.loads(base64.b64decode(current["content"]).decode("utf-8"))
+    major_runs = ledger.pop("major_runs", [])
+    run_id = os.environ["GITHUB_RUN_ID"]
     today = datetime.datetime.now(ZoneInfo("Asia/Vientiane")).year
-    major = os.environ.get("MAJOR_RELEASE", "false").lower() == "true"
-    updated = next_version(state, today, major)
+    major = effective_major_request(os.environ.get("MAJOR_RELEASE", "false").lower() == "true", run_id, major_runs)
+    updated = next_version(ledger, today, major)
     name, code = version_fields(updated)
+    if major:
+        major_runs.append(run_id)
+    updated["major_runs"] = major_runs
     payload = {
         "message": f"Reserve version {name} for build {os.environ['GITHUB_RUN_ID']} attempt {os.environ['GITHUB_RUN_ATTEMPT']}",
         "content": base64.b64encode((json.dumps(updated, separators=(",", ":")) + "\n").encode()).decode(),

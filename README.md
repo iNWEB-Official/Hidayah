@@ -39,9 +39,9 @@ Home shows a randomly selected verse from Al Quran Cloud when available and fall
 
 The Quran reader is online-only. It checks chapter and verse identities across Arabic, Bengali and audio editions. The initial audio URL must match the expected reciter CDN and verse; provider URL changes can make audio unavailable. If the audio edition is unavailable or invalid, it tries to fetch the Arabic and Bengali text separately; it still needs a working text source. Device, religious accuracy and individual content-rights reviews are pending.
 
-আরবি অডিওতে শুধু একটি আয়াত, নির্বাচিত আয়াত থেকে সূরার শেষ পর্যন্ত বা প্রথম থেকে পুরো সূরা শোনার নিয়ন্ত্রণ রয়েছে। এই পরিবর্তন বাস্তব ডিভাইসে যাচাই বাকি। বাংলা অনুবাদ ও তাফসির অডিও এখনও যুক্ত নয়; উপযুক্ত রেকর্ডিং ও ব্যবহারাধিকার যাচাই প্রয়োজন।
+আরবি অডিওতে শুধু একটি আয়াত, নির্বাচিত আয়াত থেকে সূরার শেষ পর্যন্ত বা প্রথম থেকে পুরো সূরা শোনার নিয়ন্ত্রণ রয়েছে। আলাদা বাটনে Internet Archive থেকে পুরো সূরার বাংলা অনুবাদ অডিও অনলাইনে শোনার ব্যবস্থা আছে; প্রথম ফাইলে ভূমিকা রয়েছে এবং অডিওর অনুবাদ প্রদর্শিত অনুবাদ থেকে আলাদা হতে পারে। উৎসে Public Domain Mark আছে, তবে রেকর্ডিং/অনুবাদের অধিকার, ধর্মীয় নির্ভুলতা ও বাস্তব ফোনে playback যাচাই বাকি। আয়াতভিত্তিক বাংলা অনুবাদ ও বাংলা তাফসির অডিও এখনও যুক্ত নয়।
 
-Arabic recitation controls support a single ayah, playback from a selected ayah to the end, or the whole surah. Buffering and playback errors have pause/retry controls; actual playback and audio-focus behavior still need device verification. Bengali translation and tafsir audio are not implemented; suitable recordings and rights remain to be verified.
+Arabic recitation controls support a single ayah, playback from a selected ayah to the end, or the whole surah. A separate control streams the full-surah Bengali translation from Internet Archive; its first file includes an introduction, and the spoken translation may differ from the displayed text. The source is marked Public Domain, but recording/translation rights and religious accuracy remain unverified. Actual playback and audio-focus behavior need device verification. Per-ayah Bengali translation and Bengali tafsir audio are not implemented.
 
 ## Build version ও আপডেট | Build version and updates
 

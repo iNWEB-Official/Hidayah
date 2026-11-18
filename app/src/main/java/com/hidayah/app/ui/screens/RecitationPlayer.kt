@@ -116,20 +116,20 @@ fun rememberRecitationPlayer(chapter: QuranChapter): RecitationState {
 }
 
 @Composable
-fun RecitationControls(player: RecitationState) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).background(Sage, RoundedCornerShape(16.dp)).padding(14.dp)) {
+fun RecitationControls(player: RecitationState, onBeforePlay: () -> Unit = {}) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp).background(Sage, RoundedCornerShape(16.dp)).padding(14.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("মিশারী আল-আফাসী", color = Forest, fontSize = 14.sp)
                 Text("আয়াত ${banglaDigits((player.index + 1).toString())} · অনলাইনে", color = Muted, fontSize = 12.sp)
             }
             if (player.canPause) OutlinedButton(onClick = player::toggle) { Text("বিরতি") }
-            else Button(onClick = player::toggle) { Text(if (player.error != null) "আবার চেষ্টা করুন" else "শুনুন") }
+            else Button(onClick = { onBeforePlay(); player.toggle() }) { Text(if (player.error != null) "আবার চেষ্টা করুন" else "শুনুন") }
         }
         if (player.canPause && !player.playing) {
             Text(if (player.buffering) "অডিও লোড হচ্ছে…" else "অডিও সাময়িকভাবে অপেক্ষা করছে।", color = Muted, fontSize = 12.sp)
         }
-        androidx.compose.material3.TextButton(onClick = player::playWholeSurah) { Text("▶ পুরো সূরা আরবিতে শুনুন") }
+        androidx.compose.material3.TextButton(onClick = { onBeforePlay(); player.playWholeSurah() }) { Text("▶ পুরো সূরা আরবিতে শুনুন") }
         player.error?.let { Text(it, color = androidx.compose.ui.graphics.Color(0xFF9D3E30), fontSize = 12.sp) }
     }
 }

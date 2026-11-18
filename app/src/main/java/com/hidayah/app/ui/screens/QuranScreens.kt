@@ -24,6 +24,7 @@ import androidx.core.text.HtmlCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hidayah.app.data.QuranChapter
 import com.hidayah.app.data.QuranVerse
+import com.hidayah.app.data.banglaSurahUrl
 import com.hidayah.app.ui.QuranViewModel
 import com.hidayah.app.ui.QuranReaderViewModel
 import com.hidayah.app.ui.TafsirState
@@ -73,6 +74,7 @@ fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -
     LaunchedEffect(number) { viewModel.load(number) }
     val chapter = state.chapter
     val player = if (chapter != null && chapter.verses.isNotEmpty() && chapter.verses.all { it.audioUrl != null }) rememberRecitationPlayer(chapter) else null
+    val banglaPlayer = if (chapter != null && banglaSurahUrl(chapter.surah.number) != null) rememberBanglaSurahPlayer(chapter.surah.number) else null
     Column(Modifier.fillMaxSize().background(Canvas)) {
         Row(Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surahs", tint = Forest) }
@@ -80,34 +82,33 @@ fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -
                 Text(chapter?.surah?.name ?: "সূরা ${banglaDigits(number.toString())}", color = Ink, fontSize = 21.sp, fontFamily = BanglaFont)
                 Text(chapter?.surah?.meaning ?: "কুরআন পাঠ", color = Muted, fontSize = 12.sp)
             }
-            if (player != null) IconButton(onClick = player::playWholeSurah) {
+            if (player != null) IconButton(onClick = { banglaPlayer?.pause(); player.playWholeSurah() }) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = "সম্পূর্ণ সূরা আরবিতে শুনুন", tint = Forest)
             }
         }
         when {
             state.loading -> Text("আয়াত লোড হচ্ছে…", Modifier.padding(24.dp), color = Muted)
             state.error != null -> ErrorRetry(state.error!!, { viewModel.load(number, retry = true) }, Modifier.padding(24.dp))
-            chapter != null -> ReaderContent(chapter, player, state.tafsirs, viewModel::toggleTafsir, viewModel::retryTafsir)
+            chapter != null -> ReaderContent(chapter, player, banglaPlayer, state.tafsirs, viewModel::toggleTafsir, viewModel::retryTafsir)
         }
     }
 }
 
 @Composable
-private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit, onTafsirRetry: (Int) -> Unit) {
-    if (player != null) RecitationControls(player)
-    else Text("অডিও এখন পাওয়া যাচ্ছে না; আরবি ও বাংলা পাঠ পড়তে পারবেন। পরে সূরাটি আবার খুলে চেষ্টা করুন।", Modifier.padding(horizontal = 20.dp, vertical = 8.dp), color = Muted, fontSize = 13.sp)
-    // No recording is connected until its use rights and content have been verified.
-    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-        OutlinedButton(onClick = { }, enabled = false) { Text("▶ পুরো সূরা বাংলায় শুনুন") }
-        Text("বাংলা অডিও যাচাই ও ব্যবহারের অনুমতি নিশ্চিত হলে চালু হবে।", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
-    }
+private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, banglaPlayer: BanglaSurahState?, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit, onTafsirRetry: (Int) -> Unit) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            if (player != null) RecitationControls(player, onBeforePlay = { banglaPlayer?.pause() })
+            else Text("আরবি অডিও এখন পাওয়া যাচ্ছে না; পাঠ পড়তে পারবেন। পরে সূরাটি আবার খুলে চেষ্টা করুন।", color = Muted, fontSize = 13.sp)
+            if (banglaPlayer != null) BanglaSurahControls(banglaPlayer, onBeforePlay = { player?.pause() })
+            else Text("বাংলা অডিও এখন পাওয়া যাচ্ছে না।", color = Muted, fontSize = 12.sp)
+        }
         item {
             Text("Arabic: Uthmani · বাংলা অনুবাদ: মুহিউদ্দীন খান (Al Quran Cloud)\nবাংলা তাফসির: আহসানুল বায়ান (Quran.com) · Reciter: Mishary Alafasy", color = Muted, fontSize = 11.sp, lineHeight = 17.sp)
             Spacer(Modifier.height(8.dp))
         }
         items(chapter.verses, key = { it.number }) { verse ->
-            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), audioAvailable = player != null, onTafsir = { onTafsir(verse.number) }, onTafsirRetry = { onTafsirRetry(verse.number) }, onPlay = { player?.playFrom(verse.number - 1) }, onPlaySingle = { player?.playSingle(verse.number - 1) })
+            VerseCard(chapter, verse, tafsirs[verse.number] ?: TafsirState(), audioAvailable = player != null, onTafsir = { onTafsir(verse.number) }, onTafsirRetry = { onTafsirRetry(verse.number) }, onPlay = { banglaPlayer?.pause(); player?.playFrom(verse.number - 1) }, onPlaySingle = { banglaPlayer?.pause(); player?.playSingle(verse.number - 1) })
         }
         item { Spacer(Modifier.height(18.dp)) }
     }

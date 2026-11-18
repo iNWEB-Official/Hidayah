@@ -43,6 +43,12 @@ The Quran reader is online-only. It checks chapter and verse identities across A
 
 Arabic recitation controls support a single ayah, playback from a selected ayah to the end, or the whole surah. Buffering and playback errors have pause/retry controls; actual playback and audio-focus behavior still need device verification. Bengali translation and tafsir audio are not implemented; suitable recordings and rights remain to be verified.
 
+## Build version ও আপডেট | Build version and updates
+
+Hosted GitHub Actions build-এ বছর-মেজর-ছোট পরিবর্তন অনুযায়ী version বরাদ্দ হয়; ৯৯-এর পরে মেজর বৃদ্ধি এবং নতুন বছরে reset হয়। বড় পরিবর্তনের জন্য workflow চালানোর সময় major update চিহ্নিত করতে হয়। ব্যর্থ build-এ নম্বর বাদ যেতে পারে; শুধু failed job নয়, পুনরায় চালাতে হলে সব job চালাতে হবে। এটি স্বয়ংক্রিয় release বা অ্যাপের ভেতরে download ব্যবস্থা নয়; local build-এর fallback version বিতরণের জন্য নয়।
+
+Hosted builds reserve a year-major-patch version; after patch 99 the major increases, and the next year resets the counters. Mark a major update through workflow dispatch. Failed builds can leave gaps; re-run all jobs, not only failed jobs. This does not publish a release or provide in-app downloading. The local fallback version is for development, not distribution.
+
 অ্যাপটি উন্নয়নাধীন। নামাজের সময় ও ধর্মীয় তথ্য ব্যবহারের আগে স্থানীয় নির্ভরযোগ্য উৎসের সঙ্গে মিলিয়ে নিন। কিছু সুবিধার জন্য internet বা অবস্থান অনুমতি প্রয়োজন হতে পারে।
 
 The app is under development. Please check prayer times and religious information against reliable local sources. Some features may require internet access or location permission.
@@ -51,7 +57,7 @@ The app is under development. Please check prayer times and religious informatio
 
 | বিষয় / Item | লিংক / Link | Access |
 |---|---|---|
-| অ্যাপের source code | [Hidayah source](https://github.com/iNWEB-Official/Hidayah/tree/main/app/src) | Public |
+| অ্যাপের source code | [Hidayah source](https://github.com/iNWEB-Official/HidayahAPPS/tree/main/app/src) | Public |
 | Development নথির তালিকা | [Documentation index](https://github.com/iNWEB-Official/iNWEB-Official-Documentation/blob/main/Hidayah/INDEX.md) | Private |
 | Development README | [Private README](https://github.com/iNWEB-Official/iNWEB-Official-Documentation/blob/main/Hidayah/README.md) | Private |
 | সব প্রকাশ্য resources | [Hidayah resources](https://github.com/iNWEB-Official/iNWEB-Official-Public-Resources/tree/main/Hidayah) | Public |

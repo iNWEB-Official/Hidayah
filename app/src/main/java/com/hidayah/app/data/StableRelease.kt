@@ -24,7 +24,7 @@ fun parseStableRelease(json: JSONObject, installedVersionCode: Long): StableRele
     val uri = URI(url)
     if (!uri.scheme.equals("https", ignoreCase = true) || !uri.host.equals("github.com", ignoreCase = true) ||
         uri.userInfo != null || uri.port !in listOf(-1, 443) || uri.rawQuery != null || uri.rawFragment != null ||
-        uri.rawPath != "/iNWEB-Official/Hidayah/releases/download/$tag/$filename") return null
+        uri.rawPath != "/iNWEB-Official/HidayahAPPS/releases/download/$tag/$filename") return null
     StableRelease(name, code, url)
     } catch (_: Exception) { null }
 }

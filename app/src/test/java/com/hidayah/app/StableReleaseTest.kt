@@ -7,7 +7,7 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class StableReleaseTest {
-    private fun release(tag: String = "v2026.0.2", url: String = "https://github.com/iNWEB-Official/Hidayah/releases/download/v2026.0.2/Hidayah-2026.0.2.apk") =
+    private fun release(tag: String = "v2026.0.2", url: String = "https://github.com/iNWEB-Official/HidayahAPPS/releases/download/v2026.0.2/Hidayah-2026.0.2.apk") =
         JSONObject().put("tag_name", tag).put("draft", false).put("prerelease", false)
             .put("assets", JSONArray().put(JSONObject().put("name", "Hidayah-2026.0.2.apk").put("state", "uploaded").put("browser_download_url", url)))
 
@@ -26,10 +26,10 @@ class StableReleaseTest {
         }
     }
     @Test fun rejectsUnexpectedDownloadsAndMissingOrDuplicateAssets() {
-        listOf("http://github.com/iNWEB-Official/Hidayah/releases/download/v2026.0.2/Hidayah-2026.0.2.apk",
-            "https://github.com.evil.example/iNWEB-Official/Hidayah/releases/download/v2026.0.2/Hidayah-2026.0.2.apk",
+        listOf("http://github.com/iNWEB-Official/HidayahAPPS/releases/download/v2026.0.2/Hidayah-2026.0.2.apk",
+            "https://github.com.evil.example/iNWEB-Official/HidayahAPPS/releases/download/v2026.0.2/Hidayah-2026.0.2.apk",
             "https://github.com/other/Hidayah/releases/download/v2026.0.2/Hidayah-2026.0.2.apk",
-            "https://github.com/iNWEB-Official/Hidayah/releases/download/v2026.0.2/Hidayah-2026.0.2.apk?x=1").forEach {
+            "https://github.com/iNWEB-Official/HidayahAPPS/releases/download/v2026.0.2/Hidayah-2026.0.2.apk?x=1").forEach {
             assertNull(parseStableRelease(release(url = it), 20260001))
         }
         assertNull(parseStableRelease(release().put("assets", JSONArray()), 20260001))

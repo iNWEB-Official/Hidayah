@@ -96,6 +96,11 @@ fun QuranReaderScreen(number: Int, viewModel: QuranReaderViewModel, onBack: () -
 private fun ReaderContent(chapter: QuranChapter, player: RecitationState?, tafsirs: Map<Int, TafsirState>, onTafsir: (Int) -> Unit, onTafsirRetry: (Int) -> Unit) {
     if (player != null) RecitationControls(player)
     else Text("অডিও এখন পাওয়া যাচ্ছে না; আরবি ও বাংলা পাঠ পড়তে পারবেন। পরে সূরাটি আবার খুলে চেষ্টা করুন।", Modifier.padding(horizontal = 20.dp, vertical = 8.dp), color = Muted, fontSize = 13.sp)
+    // No recording is connected until its use rights and content have been verified.
+    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+        OutlinedButton(onClick = { }, enabled = false) { Text("▶ পুরো সূরা বাংলায় শুনুন") }
+        Text("বাংলা অডিও যাচাই ও ব্যবহারের অনুমতি নিশ্চিত হলে চালু হবে।", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+    }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Text("Arabic: Uthmani · বাংলা অনুবাদ: মুহিউদ্দীন খান (Al Quran Cloud)\nবাংলা তাফসির: আহসানুল বায়ান (Quran.com) · Reciter: Mishary Alafasy", color = Muted, fontSize = 11.sp, lineHeight = 17.sp)
